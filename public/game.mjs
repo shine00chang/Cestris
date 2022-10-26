@@ -38,9 +38,27 @@ export default class Game {
             if (clear)
                 clears ++;
         }
-        return clears;
+        let clear = 'none';
+        if (clears == 1) clear = 'single';
+        if (clears == 2) clear = 'double';
+        if (clears == 3) clear = 'triple';
+        if (clears == 4) clear = 'tetris'; 
+        return clear;
     }
-    
+    // Calculates the outgoing attack based on clear, b2b, combos and incomming garbage.
+    static #calcAttack () {
+        if (this.state.clear == 'none') return;
+
+        let rawAttack = k.ATTACK_MAP[this.state.clear];
+        while (rawAttack != 0 && this.state.garbage.length != 0) {
+            const d = Math.min( rawAttack, this.state.garbage[0] );
+            this.state.garbage[0] -= d;
+            rawAttack -= d;
+            if (this.state.garbage[0] == 0) this.state.garbage.shift();
+        }
+        this.state.attack = rawAttack;
+    }
+
     // Inserts rows of garbage.
     static #spawnGarbage () {
         let rowsSpawned = 0;
@@ -48,6 +66,7 @@ export default class Game {
         // For each attack (since rows from the same attack has the same column)
         for (let i=0; i<this.state.garbage.length; i++) {
             // Make sure rows doesn't exceed Garbage cap.
+            this.state.acceptedGarbage = true;
             let spawn = Math.max(this.state.garbage[i], this.state.garbage[i] - (k.GARBAGE_CAP - rowsSpawned));
             // Shift board up by 'spawn'
             for (let y=0; y<20 - spawn; y++) 
@@ -55,7 +74,7 @@ export default class Game {
                     this.state.grid[y * 10 + x] = this.state.grid[(y+spawn) * 10 + x];
 
             // Generate random garbage hole column.
-            let column = Math.floor(State.rand(this.state.randState) * 10);
+            let column = Math.floor(State.rand(this.state.garbageRandState) * 10);
             // Add Garbage rows
             for (let r=0; r<spawn; r++) 
                 for (let x=0; x<10; x++) 
@@ -123,7 +142,7 @@ export default class Game {
     }
     
     // Tick
-    static #tick () {
+    static #tick (shouldSpawnGarbage = true) {
         let p = this.state.piece;
         p.tick += k.GRAVITY_SPEED; 
 
@@ -138,10 +157,11 @@ export default class Game {
                 // If lock
                 if (p.tick > k.LOCK_LIMIT) {
                     this.#lockPiece();
-                    this.#removeClears();
+                    this.state.clear = this.#removeClears();
+                    this.#calcAttack();
 
                     // Spawn Garbage
-                    this.#spawnGarbage();
+                    if(shouldSpawnGarbage) this.#spawnGarbage();
 
                     this.#nextPiece();
                 }
@@ -161,7 +181,7 @@ export default class Game {
         return false;
     }
     
-    static process( state, inputs ) {
+    static process( state, inputs, shouldSpawnGarbage = true ) {
         this.state = state;
 
         inputs.forEach( input => {
@@ -212,7 +232,7 @@ export default class Game {
                 }
             }
         }
-        this.#tick();
+        this.#tick(shouldSpawnGarbage);
         // Check if game over (piece has conflict w/ board), if over, lock piece, signal driver to stop.
         state.over = this.#checkOver();
         if (state.over) 

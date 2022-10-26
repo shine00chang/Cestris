@@ -10,9 +10,9 @@ export default class LocalDriver {
         this.frameIndex = 0;
 
         this.inputs = [];
-        this.state = new State();
-        Game.initialize(this.state);
         
+        this.state = new State();
+
         this.keys = {};
         this.configs = {};
     
@@ -33,7 +33,8 @@ export default class LocalDriver {
     }
 
     start = () => {
-        // Start states ( generate first piece )
+        // Initialize    
+        Game.initialize(this.state);
         Game.start(this.state);
 
         // Start listeners

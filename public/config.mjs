@@ -174,6 +174,12 @@ export const PIECE_COLOR = {
     'garbage': '#444'
 }
 export const GARBAGE_CAP = 12;
+export const ATTACK_MAP = {
+    'single': 4,
+    'double': 1,
+    'triple': 2,
+    'tetris': 4,
+}
 
 export const SOFT_DROP_SPEED = 10;
 export const GRAVITY_SPEED = 1;
@@ -186,3 +192,4 @@ export const ARR_LIMIT = 0;
 export const SIZE = 20;
 
 export const FRAME_RATE = 60;
+export const PEER_RENDER_SKIPS = 2;

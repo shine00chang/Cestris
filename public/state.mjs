@@ -16,6 +16,17 @@ function cyrb128(str) {
     h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
     return [(h1^h2^h3^h4)>>>0, (h2^h1)>>>0, (h3^h1)>>>0, (h4^h1)>>>0];
 }
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+function generateString(length) {
+    let result = ' ';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}
+
 
 export class Piece {
     constructor (type) {
@@ -30,6 +41,7 @@ export class Piece {
         return k.PIECE_MAPS[p.type][p.r][y * p.mapSize + x];
     }
 }
+
 export class State {    
     static rand(state) {
         state[0] >>>= 0; state[1] >>>= 0; state[2] >>>= 0; state[3] >>>= 0; 
@@ -42,19 +54,25 @@ export class State {
         state[2] = state[2] + t | 0;
         return (t >>> 0) / 4294967296;
     }
+    static setSeed(state, seed) {
+        state.randState = cyrb128(seed[0]);
+        state.garbageRandState = cyrb128(seed[1]);
+    }
     
     constructor () {
         this.grid = new Array(200);
         
-        this.randState = cyrb128("I really love tetris!");
+        this.randState = cyrb128(generateString(10));
+        this.garbageRandState = cyrb128(generateString(10));
          
         this.bag = [];
         this.queue = [];
         this.piece = undefined;
         this.hold = undefined;
-
+        
+        this.acceptedGarbage = false;
         this.garbage = [];
-        this.outgoingGarbage = 0;
+        this.attack = 0;
             
         this.DAStick = 0;
         this.ARRtick = 0;

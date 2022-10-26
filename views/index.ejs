@@ -7,6 +7,11 @@
     </head>
     <body>
         <h1>Cestris</h1>
+        <p id='error' style="color: red"></p>
+        <label for="roomid">Room ID: </label>
+        <input id="roomid-input" name="roomid"></input>
+        <label for="name">Username: </label>
+        <input id="name-input" name="name"></input> <br>
         <button id="online-join-button">Online-Join</button>
         <button id="online-ready-button">Online-Ready</button>
         <button id="local-button">Local</button>
@@ -14,8 +19,13 @@
         <div style="display:flex">
             <div id="main-view" style="margin: 10px"> Game:<br> </div>
             <div id="remote-view" style="margin: 10px"> Remote:<br> </div>
+            <div id="debug-view" style="margin: 10px"> Debug:<br> </div>
         </div>
         
+        <p>Room ID: </p><p id="roomId"></p>
+        <lu id="member-list"> 
+            Members: <br>
+        </lu> <br>
         <div id="chat-box"> 
             Chat: <br>
             <lu id="chat-stream">
