@@ -32,9 +32,9 @@ export class Piece {
     constructor (type) {
         this.type = type;
         this.r = 0;
-        this.mapSize = type == 'I' ? 5 : 3;
+        this.mapSize = type == 'I' ? 4 : 3;
         this.tick = 0;
-        this.x = 3;
+        this.x = type == 'I' ? 3 : 3;
         this.y = 0;
     }
     static map(p, x, y) {
@@ -69,6 +69,7 @@ export class State {
         this.queue = [];
         this.piece = undefined;
         this.hold = undefined;
+        this.held = false;
         
         this.acceptedGarbage = false;
         this.garbage = [];

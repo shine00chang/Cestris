@@ -1,9 +1,8 @@
 import Game from "./game.mjs";
 import GameElement from "./renderer.mjs";
 import { State } from "./state.mjs";
-import { FRAME_RATE, PEER_RENDER_SKIPS } from "./config.mjs";
+import { FRAME_RATE } from "./config.mjs";
 import LocalDriver from "./localDriver.mjs";
-import simulate from "./simulator.mjs";
 
 export default class OnlineDriver extends LocalDriver {
 
@@ -19,7 +18,7 @@ export default class OnlineDriver extends LocalDriver {
         this.frameOffset = 0;
 
         this.peerRenderer = new GameElement(peerParent);
-        this.peerRenderer.renderFrom(this.peerStateAt(0));
+        //this.peerRenderer.renderFrom(this.peerStateAt(0));
         this.reconcileIndex = 0;
     }
 
@@ -75,31 +74,22 @@ export default class OnlineDriver extends LocalDriver {
             if (data.from == this.socket.id) return;
             console.log(data);
 
-            // Apply offset (desynchronization protection);
-            //data.frame -= this.frameOffset;
-            // Safety. If the sent event is at a future frame (caused by slight desynchronizations), 
-            // set frame offset.
-            if (data.frame > this.frameIndex) {
+            // Logging. If the sent event is at a future frame (caused by slight desynchronizations)
+            if (data.frame > this.frameIndex) 
                 console.log('online-event data received frame later than current frame');
-            }
-
+        
             // Change offset. Assume that the inputs are never sent out-of-order and will not reference a
             // frame already commited to. Remove all records up to the new offset.
-            /*
             for (let f = this.recordIndex; f < Math.min(this.frameIndex, data.frame); f++ ) 
                 this.peerRecord.shift();
             this.recordIndex = Math.min(this.frameIndex, data.frame);
-            */
             
             // Add to input
             this.peerInputsAt(data.frame).push(data.event);
             //this.peerRecord.at(0).inputs.push(data.event);
             
-            // Call for reconcilation. No need to send starting frame, since
-            // the offset has been change to the edited frame.
-            // NOTE: potential sync problem?
+            // Store where to being reconcilation.
             this.reconcileIndex = Math.min(this.reconcileIndex, data.frame);
-            //this.reconcile(data.frame);
         });
     }
 
@@ -138,15 +128,7 @@ export default class OnlineDriver extends LocalDriver {
 
     onFrame = () => {
         const startTime = new Date();
-        if (this.frameIndex == 2000) {
-            console.log('local inputs record: ', this.inputsRecord);
-
-            const peerInputsRecord = this.peerRecord.map(record => record.inputs);
-            console.log('peer inputs record: ', peerInputsRecord);
-
-            simulate(peerInputsRecord, this.seeds);
-            return;
-        }
+        
         // Local Game
         this.inputsRecord.push(this.inputs);
         Game.process(this.state, this.inputs);
@@ -158,10 +140,8 @@ export default class OnlineDriver extends LocalDriver {
 
         // Peer Game
         // Reconcile
-        //if (this.reconcileIndex != this.frameIndex) {
-        //    console.log(this.reconcileIndex);
-            this.reconcile(this.reconcileIndex);
-        //}
+        this.reconcile(this.reconcileIndex);
+        
         const peerInputs = this.peerInputsAt(this.frameIndex);
         const peerNextState = this.peerStateAt(this.frameIndex + 1);
         // Check if garbage accepted
@@ -171,9 +151,6 @@ export default class OnlineDriver extends LocalDriver {
             shouldSpawnGarbage = true;
         
         Game.process(peerNextState, peerInputs, shouldSpawnGarbage);
-        
-        // Skip rendering sometimes. This is to prevent jittery movement caused by constant reconcilations.
-        //if (this.frameIndex % PEER_RENDER_SKIPS === 0)
         this.peerRenderer.renderFrom(this.peerStateAt(this.frameIndex +1));
         
         // Player-to-Player interactions, i.e. attacks.
@@ -182,12 +159,11 @@ export default class OnlineDriver extends LocalDriver {
 
         this.frameIndex ++;
         this.reconcileIndex = this.frameIndex;
-        
 
         // Call function again if not over, else render gameover screen
         const timeElapsed = new Date().getTime() - startTime.getTime();
         if (!this.over && !this.state.over && !this.peerStateAt(this.frameIndex).over) {
-            setTimeout(this.onFrame, 1000 / FRAME_RATE - timeElapsed);
+            setTimeout(this.onFrame, Math.max(0, 1000 / FRAME_RATE - timeElapsed));
         } else {
             this.peerRenderer.renderOver(this.peerStateAt(this.frameIndex));
             this.renderer.renderOver(this.state);

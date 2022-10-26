@@ -17,7 +17,7 @@ export default class LocalDriver {
         this.configs = {};
     
         this.renderer = new Renderer(parent);
-        this.renderer.renderFrom(this.state);
+        //this.renderer.renderFrom(this.state);
     }
 
     destruct = () => {
@@ -73,7 +73,6 @@ export default class LocalDriver {
         
         if (!this.over && !this.state.over) {
             setTimeout(this.onFrame, 1000 / FRAME_RATE);
-        } else 
-            this.renderer.renderOver(this.state);
+        }
     }
 }

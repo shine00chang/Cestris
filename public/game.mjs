@@ -127,6 +127,9 @@ export default class Game {
     
     // Writes piece to grid.
     static #lockPiece () {
+        // Set didHold to false
+        this.state.didHold = false;
+
         const p = this.state.piece;
 
         for (let y=0; y<p.mapSize; y++) 
@@ -141,6 +144,19 @@ export default class Game {
         this.state.queue.push( this.#drawFromBag() );
     }
     
+    // Saving the current piece in hold state and drawing the next piece. 
+    static #holdPiece () {
+        if (this.state.didHold) return;
+        
+        this.state.didHold = true;
+        if (this.state.hold === undefined) {
+            this.state.hold = this.state.piece;
+            this.#nextPiece();
+            return;
+        }
+        [this.state.piece, this.state.hold] = [this.state.hold, this.state.piece];
+    }
+
     // Tick
     static #tick (shouldSpawnGarbage = true) {
         let p = this.state.piece;
@@ -210,6 +226,9 @@ export default class Game {
                 case 'ArrowUp':
                 case 'z':
                     if (type === 'down') this.#spinPiece(key == 'z' ? -1 : 1);
+                    break;
+                case 'c':
+                    if (type == 'down') this.#holdPiece();
                     break;
                 case ' ':
                     if (type === 'down') this.#hardDrop();
