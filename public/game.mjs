@@ -100,13 +100,32 @@ export default class Game {
 
     // Finds first valid spin, checks for kicks.
     static #spinPiece (delta) {
-        let p = this.state.piece;
+        const p = this.state.piece;
         const prevR = p.r;
         p.r = (p.r + delta) % 4;
         if (p.r < 0) p.r = 3;
 
-        if (!this.#checkConflict())
-            p.r = prevR;
+        // Generate trials
+        const offset1 = k.KICK_TABLE[p.type == "I" ? 1 : 0][prevR];
+        const offset2 = k.KICK_TABLE[p.type == "I" ? 1 : 0][p.r];
+        
+        let kicks = [];
+        for (let i=0; i<5; i++) {
+            kicks.push({
+                x: offset1[i].x - offset2[i].x,
+                y: offset1[i].y - offset2[i].y
+            });
+        }
+        for (let i=0; i<5; i++) {
+            p.x += kicks[i].x;
+            p.y -= kicks[i].y;
+            if (this.#checkConflict())
+                return;
+            p.x -= kicks[i].x;
+            p.y += kicks[i].y;
+        }
+        // If all trials fail, revert to original orientation.
+        p.r = prevR;
     }
 
     // Adds drop tick to piece
@@ -174,7 +193,7 @@ export default class Game {
         p.tick += k.GRAVITY_SPEED; 
 
         // If tick is up, Lower piece.
-        if (p.tick > k.TICK_LIMIT) {
+        if (p.tick >= k.TICK_LIMIT) {
             p.y ++;
 
             // If conflict, lock & get new piece if lock limit.
@@ -182,7 +201,7 @@ export default class Game {
                 p.y --;
 
                 // If lock
-                if (p.tick > k.LOCK_LIMIT) {
+                if (p.tick >= k.LOCK_LIMIT) {
                     this.#lockPiece();
                     this.state.clear = this.#removeClears();
                     this.#calcAttack();

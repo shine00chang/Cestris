@@ -10,13 +10,6 @@ let chat = new Chat(socket, document.getElementById('chat-box'));
 
 chat.startListeners();
 
-// Stop space bar from scrolling page
-window.addEventListener('keydown', function(e) {
-    if(e.key == ' ' && e.target == document.body) {
-        e.preventDefault();
-    }
-});
-
 document.getElementById('local-button').onclick = () => {
     if (game !== undefined) game.destruct();
 

@@ -159,6 +159,68 @@ export const PIECE_MAPS = {
         ]
     ]
 };
+export const KICK_TABLE = [
+    [
+        [
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+        ],
+        [
+            {x: 0, y: 0},
+            {x: 1, y: 0},
+            {x: 1, y:-1},
+            {x: 0, y: 2},
+            {x: 1, y: 2}
+        ],
+        [
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+        ],
+        [
+            {x: 0, y: 0},
+            {x:-1, y: 0},
+            {x:-1, y:-1},
+            {x: 0, y: 2},
+            {x:-1, y: 2}
+        ],
+    ],
+    [
+        [
+            {x: 0, y: 0},
+            {x:-1, y: 0},
+            {x: 2, y: 0},
+            {x:-1, y: 0},
+            {x: 2, y: 0}
+        ],
+        [
+            {x:-1, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 1},
+            {x: 0, y:-2},
+        ],
+        [
+            {x:-1, y: 1},
+            {x: 1, y: 1},
+            {x:-2, y: 1},
+            {x: 1, y: 0},
+            {x:-2, y: 0},
+        ],
+        [
+            {x: 0, y: 1},
+            {x: 0, y: 1},
+            {x: 0, y: 1},
+            {x: 0, y:-1},
+            {x: 0, y: 2},
+        ]
+    ],
+]
 export const PIECE_COLOR = {
     'L': '#e09334',
     'J': '#3c34e0',
@@ -178,9 +240,9 @@ export const ATTACK_MAP = {
 }
 
 export const SOFT_DROP_SPEED = 10;
-export const GRAVITY_SPEED = 1;
-export const TICK_LIMIT = 20000;
-export const LOCK_LIMIT = Math.max(TICK_LIMIT, 100);
+export const GRAVITY_SPEED = 0;
+export const TICK_LIMIT = 30;
+export const LOCK_LIMIT = Math.max(TICK_LIMIT,60);
  
 export const DAS_LIMIT = 8;
 export const ARR_LIMIT = 0;

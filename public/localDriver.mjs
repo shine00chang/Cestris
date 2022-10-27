@@ -49,11 +49,13 @@ export default class LocalDriver {
 
 
     handleKeyDown = (e) => {
+        e.preventDefault();
         if (!this.keys[e.key]) 
             this.publishEvent(e.key + '-down');
         this.keys[e.key] = true;
     }
     handleKeyUp = (e) => {
+        e.preventDefault();
         if (this.keys[e.key]) 
             this.publishEvent(e.key + '-up');
         this.keys[e.key] = false;
