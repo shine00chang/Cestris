@@ -1,5 +1,4 @@
 import * as k from './config.mjs';
-import { Piece } from './state.mjs';
 
 export default class GameElement {
     constructor (parent) {

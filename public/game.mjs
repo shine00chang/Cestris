@@ -73,10 +73,10 @@ export default class Game {
             return;
         }
         this.state.combo ++;
-        if (k.B2B_CLEARS.includes(clear)) {
-            console.log("b2b'ed");
+        if (k.B2B_CLEARS.includes(clear)) 
             this.state.b2b ++;
-        }
+        else 
+            this.state.b2b  = 0;
         let b2b_level = 0;
         while (this.b2b > k.B2B_LEVELS[b2b_level]) b2b_level++; 
 
@@ -294,7 +294,8 @@ export default class Game {
                     break;
                 case 'ArrowUp':
                 case 'z':
-                    if (type === 'down') this.#spinPiece(key == 'z' ? -1 : 1);
+                case 'a':
+                    if (type === 'down') this.#spinPiece(key == 'z' ? -1 : key == 'a' ? 2 : 1);
                     break;
                 case 'c':
                     if (type == 'down') this.#holdPiece();
