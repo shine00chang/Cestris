@@ -17,7 +17,6 @@ export default class LocalDriver {
         this.configs = {};
     
         this.renderer = new Renderer(parent);
-        //this.renderer.renderFrom(this.state);
     }
 
     destruct = () => {

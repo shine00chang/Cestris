@@ -1,6 +1,7 @@
 import * as k from './config.mjs';
 import { State, Piece } from './state.mjs';
 
+
 export default class Game {
     static state; 
     
@@ -47,9 +48,19 @@ export default class Game {
     }
     // Calculates the outgoing attack based on clear, b2b, combos and incomming garbage.
     static #calcAttack () {
-        if (this.state.clear == 'none') return;
+        const clear = this.state.clear;
 
-        let rawAttack = k.ATTACK_MAP[this.state.clear];
+        if (clear == 'none') {
+            this.state.combo = 0;
+            return;
+        }
+        this.state.combo ++;
+        if (k.B2B_CLEARS.includes(clear)) this.state.b2b ++;
+        let b2b_level = 0;
+        while (this.b2b > k.B2B_LEVELS[b2b_level]) b2b_level++; 
+
+
+        let rawAttack = k.ATTACK_MAP[clear] + k.COMBO_TABLE[this.state.combo] + k.B2B_LEVELS[b2b_level]; 
         while (rawAttack != 0 && this.state.garbage.length != 0) {
             const d = Math.min( rawAttack, this.state.garbage[0] );
             this.state.garbage[0] -= d;

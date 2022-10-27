@@ -32,9 +32,9 @@ export class Piece {
     constructor (type) {
         this.type = type;
         this.r = 0;
-        this.mapSize = type == 'I' ? 4 : 3;
+        this.mapSize = type == 'I' ? 5 : 3;
         this.tick = 0;
-        this.x = type == 'I' ? 3 : 3;
+        this.x = type == 'I' ? 2 : 3;
         this.y = 0;
     }
     static map(p, x, y) {
@@ -75,6 +75,8 @@ export class State {
         this.acceptedGarbage = false;
         this.garbage = [];
         this.attack = 0;
+        this.combo = 0;
+        this.b2bCounter = 0;
             
         this.DAStick = 0;
         this.ARRtick = 0;

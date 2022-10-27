@@ -85,13 +85,13 @@ export default class GameElement {
         // Draw Hold
         if (state.hold !== undefined) {
             const p = state.hold;
-            const len = Math.sqrt(k.PIECE_MAPS[p][0].length);
+            const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
             const cx = 10;
             const cy = 10;
             const s = 15;
             for (let y = 0; y<len; y++) 
                 for (let x = 0; x<len; x++) 
-                    if (k.PIECE_MAPS[p][0][y * len + x] == 1) {
+                    if (k.PIECE_MAPS[p][p == "I" ? 2 : 0][y * len + x] == 1) {
                         ctx.fillStyle = k.PIECE_COLOR[p];
                         ctx.fillRect(cx + x * s, cy + y * s, s, s);
                     }
@@ -100,13 +100,13 @@ export default class GameElement {
         // Draw Previews 
         for (let i=0; i<5; i++) {
             const p = state.queue[i];
-            const len = Math.sqrt(k.PIECE_MAPS[p][0].length);
+            const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
             const cx = 300;
             const cy = 10 + 50 * i;
             const s = 15;
             for (let y = 0; y<len; y++) 
                 for (let x = 0; x<len; x++) 
-                    if (k.PIECE_MAPS[p][0][y * len + x] == 1) {
+                    if (k.PIECE_MAPS[p][p == "I" ? 2 : 0][y * len + x] == 1) {
                         ctx.fillStyle = k.PIECE_COLOR[p];
                         ctx.fillRect(cx + x * s, cy + y * s, s, s);
                     }
