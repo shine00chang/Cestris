@@ -247,6 +247,10 @@ export const ATTACK_MAP = {
     'double': 1,
     'triple': 2,
     'tetris': 4,
+    
+    "tspin single": 2,
+    "tspin double": 4,
+    "tspin triple": 6,
 }
 export const COMBO_TABLE = [
     0, 0, 1, 1, 2, 2, 3, 3, 3, 4,
@@ -260,6 +264,9 @@ export const B2B_LEVELS = [
 ];
 export const B2B_CLEARS = [
     "tetris",
+    "tspin single",
+    "tspin double",
+    "tspin triple",
 ];
 
 

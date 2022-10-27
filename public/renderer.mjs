@@ -117,5 +117,16 @@ export default class GameElement {
         garbage = Math.min(garbage, 20);
         ctx.fillStyle = '#f00';
         ctx.fillRect(cx - 4, (20 - garbage) * k.SIZE , 4, garbage * k.SIZE);
+
+        // Draw Combo Indicator
+        if (state.combo > 2) {
+            ctx.font = '14px serif';
+            ctx.fillText(`Combo x${state.combo}`, 10, 100);
+        }
+        // Draw B2B Indicator
+        if (state.b2b > 0) {
+            ctx.font = '20px serif';
+            ctx.fillText(`B2B x${state.b2b}`, 10, 150);
+        }
     }
 }

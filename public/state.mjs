@@ -36,6 +36,7 @@ export class Piece {
         this.tick = 0;
         this.x = type == 'I' ? 2 : 3;
         this.y = 0;
+        this.didKick = false;
     }
     static map(p, x, y) {
         return k.PIECE_MAPS[p.type][p.r][y * p.mapSize + x];
@@ -76,7 +77,7 @@ export class State {
         this.garbage = [];
         this.attack = 0;
         this.combo = 0;
-        this.b2bCounter = 0;
+        this.b2b = 0;
             
         this.DAStick = 0;
         this.ARRtick = 0;

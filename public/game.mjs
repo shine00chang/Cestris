@@ -25,6 +25,22 @@ export default class Game {
     }
 
     static #removeClears () {
+        // Check t-spin: 3-point rule
+        let tspin = false;
+        if (this.state.piece.type == 'T' && this.state.piece.didSpin) {
+            let cnt = 0;
+            const p = this.state.piece;
+            const occupy = (x, y) => {
+                if (x < 0 || y < 0 || x >= 20 || y >= 10) return true;
+                return this.state.grid[y * 20 + x] != undefined;
+            }
+            if (occupy(p.x, p.y)) cnt ++;
+            if (occupy(p.x, p.y+2)) cnt ++;
+            if (occupy(p.x+2, p.y)) cnt ++;
+            if (occupy(p.x+2, p.y+2)) cnt ++; 
+            tspin = cnt >= 3;
+        }
+
         let clears = 0;
         for (let y=19; y>=0; y--) {
             let clear = true;
@@ -39,11 +55,13 @@ export default class Game {
             if (clear)
                 clears ++;
         }
-        let clear = 'none';
-        if (clears == 1) clear = 'single';
-        if (clears == 2) clear = 'double';
-        if (clears == 3) clear = 'triple';
-        if (clears == 4) clear = 'tetris'; 
+        let clear = "";
+        if (tspin && clears != 0) clear = 'tspin ';
+        if (clears == 0) clear += 'none';
+        if (clears == 1) clear += 'single';
+        if (clears == 2) clear += 'double';
+        if (clears == 3) clear += 'triple';
+        if (clears == 4) clear += 'tetris'; 
         return clear;
     }
     // Calculates the outgoing attack based on clear, b2b, combos and incomming garbage.
@@ -55,7 +73,10 @@ export default class Game {
             return;
         }
         this.state.combo ++;
-        if (k.B2B_CLEARS.includes(clear)) this.state.b2b ++;
+        if (k.B2B_CLEARS.includes(clear)) {
+            console.log("b2b'ed");
+            this.state.b2b ++;
+        }
         let b2b_level = 0;
         while (this.b2b > k.B2B_LEVELS[b2b_level]) b2b_level++; 
 
@@ -100,12 +121,15 @@ export default class Game {
 
     // Moves piece if there is no conflict. Returns whether or not the move happened (for DAS system)
     static #movePiece (delta) {
-        let p = this.state.piece;
+        const p = this.state.piece;
         p.x += delta;
         if (!this.#checkConflict()) {
             p.x -= delta;
             return false;
         }
+
+        // Remove 'didSpin' label.
+        p.didSpin = false;
         return true;
     }
 
@@ -130,8 +154,10 @@ export default class Game {
         for (let i=0; i<5; i++) {
             p.x += kicks[i].x;
             p.y -= kicks[i].y;
-            if (this.#checkConflict())
+            if (this.#checkConflict()) {
+                p.didSpin = true;
                 return;
+            }
             p.x -= kicks[i].x;
             p.y += kicks[i].y;
         }
@@ -258,7 +284,7 @@ export default class Game {
                         state.DAStick = 1;
                         state.ARRtick = 0;
                         state.DASd = d;
-                    
+                
                     // If keyup, stop DAS
                     } if (type === 'up') 
                         state.DAStick = 0;
