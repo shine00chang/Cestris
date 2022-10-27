@@ -70,6 +70,7 @@ export class State {
         this.piece = undefined;
         this.hold = undefined;
         this.held = false;
+        this.ghostY = 0;
         
         this.acceptedGarbage = false;
         this.garbage = [];

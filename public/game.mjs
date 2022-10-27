@@ -150,16 +150,27 @@ export default class Game {
         
         this.state.didHold = true;
         if (this.state.hold === undefined) {
-            this.state.hold = this.state.piece;
+            this.state.hold = this.state.piece.type;
             this.#nextPiece();
             return;
         }
-        [this.state.piece, this.state.hold] = [this.state.hold, this.state.piece];
+        const temp = this.state.piece.type;
+        this.state.piece = new Piece(this.state.hold)
+        this.state.hold = temp;
+    }
+    static #getGhostPos () {
+        const p = this.state.piece;
+        const temp = p.y;
+        do {
+            p.y ++;
+        } while (this.#checkConflict());
+        this.state.ghostY = p.y - 1;
+        p.y = temp;
     }
 
     // Tick
     static #tick (shouldSpawnGarbage = true) {
-        let p = this.state.piece;
+        const p = this.state.piece;
         p.tick += k.GRAVITY_SPEED; 
 
         // If tick is up, Lower piece.
@@ -185,6 +196,8 @@ export default class Game {
                 p.tick = 0;
             }
         }
+        // Set ghost piece y-position 
+        this.#getGhostPos();
     }
 
     static #checkOver () {
