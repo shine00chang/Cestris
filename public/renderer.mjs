@@ -128,4 +128,61 @@ export default class GameElement {
             ctx.fillText(`B2B x${state.b2b}`, 10, 150);
         }
     }
+    renderCountDown (state, countdown) {
+        const over = state.over;
+        const ctx = this.canvas.getContext("2d");
+
+        // Reset 
+        ctx.fillStyle = 'rgb(0,0,0)';
+        ctx.fillRect(0, 0, 360, 400);
+        
+        const cx = 80;
+        const cy = 0;
+        // Draw Grid 
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let y=0; y<=20; y++) {
+            ctx.moveTo(cx, cy + y * k.SIZE); 
+            ctx.lineTo(cx + 10 * k.SIZE, cy + y * k.SIZE); 
+            ctx.stroke(); 
+        }
+        for (let x=0; x<=10; x++) {
+            ctx.moveTo(cx + x * k.SIZE, cy); 
+            ctx.lineTo(cx + x * k.SIZE, cy + 20 * k.SIZE); 
+            ctx.stroke(); 
+        }
+        ctx.closePath();
+
+        // Draw Previews 
+        for (let i=0; i<5; i++) {
+            const p = state.queue[i];
+            const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
+            const cx = 300;
+            const cy = 10 + 50 * i;
+            const s = 15;
+            for (let y = 0; y<len; y++) 
+                for (let x = 0; x<len; x++) 
+                    if (k.PIECE_MAPS[p][p == "I" ? 2 : 0][y * len + x] == 1) {
+                        ctx.fillStyle = k.PIECE_COLOR[p];
+                        ctx.fillRect(cx + x * s, cy + y * s, s, s);
+                    }
+        }  
+
+        // Draw Countdown tick
+        ctx.fillStyle = 'rgb(200,200,0)';
+        ctx.font = '20px serif';
+        ctx.fillText(`${countdown}`, this.canvas.width / 2 - 5, this.canvas.height / 2 - 10);
+    }
+    renderWaitScreen () {
+        const ctx = this.canvas.getContext("2d");
+
+        // Reset 
+        ctx.fillStyle = 'rgb(0,0,0)';
+        ctx.fillRect(0, 0, 360, 400);
+
+        ctx.fillStyle = 'rgb(200,200,0)';
+        ctx.font = '20px serif';
+        ctx.fillText(`Waiting...`, this.canvas.width / 2 - 70, this.canvas.height / 2 - 10);
+    }
 }

@@ -75,8 +75,8 @@ class Client {
         this.socket = socket;
     }
 }
-let clients = {};
-let rooms = {};
+const clients = {};
+const rooms = {};
 
 onTick = () => {
     //processInputs
@@ -179,15 +179,22 @@ startListeners = (socket) => {
     // On 'online-ready', Set user as ready.
     // If all clients are ready, begin game.
     socket.on('online-ready', data => {
-        console.log("client '%s' ready for game. ", socket.id);
-        
+        if (!(socket.id in clients)) {
+            console.log("client not yet joined, rejecting.");
+            return;
+        }
+    
         const client = clients[socket.id];
         const room = rooms[client.roomId];
 
+        console.log("client '%s' ready for game in room '%s'. ", client.name, room.id);
         if (client === undefined || room === undefined) return;
         
         client.ready = true;
 
+        // Check number of peers, if only one, don't start.
+        if (room.clients.length == 1) 
+            return;
         // Check peers in room for start
         let shouldStart = true;
         room.clients.forEach( peer => {

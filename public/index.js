@@ -17,7 +17,9 @@ document.getElementById('local-button').onclick = () => {
     setTimeout(game.start, 3000);
 }
 
-document.getElementById('online-join-button').onclick = () => {
+document.getElementById('online-join-button').onclick = onOnlineJoin;
+
+function onOnlineJoin () {
     if (game !== undefined) return;
 
     // Send 'online-join' event to signal join
@@ -60,9 +62,31 @@ document.getElementById('online-join-button').onclick = () => {
         }
         socket.off('online-join-ack');
     });
+
+    // activate ready button
+    document.getElementById('online-ready-button').style.display = 'inline';
+    document.getElementById('online-ready-button').onclick = onOnlineReady;
+
+    // switch callback function to online-leave
+    document.getElementById('online-join-button').innerText = 'online-leave';
+    document.getElementById('online-join-button').onclick = onOnlineLeave;
 }
 
-document.getElementById('online-ready-button').onclick = () => {
+function onOnlineLeave () {
+    socket.emit('online-leave');
+
+    // de-activate ready button
+    document.getElementById('online-ready-button').style.display = 'inline';
+    document.getElementById('online-ready-button').onclick = onOnlineReady;
+
+    // switch callback function to online-join
+    document.getElementById('online-join-button').innerText = 'online-join';
+    document.getElementById('online-join-button').onclick = onOnlineJoin;
+}
+
+
+
+function onOnlineReady () {
     if (game !== undefined) return;
 
     socket.emit('online-ready');

@@ -18,8 +18,14 @@ export default class OnlineDriver extends LocalDriver {
         this.frameOffset = 0;
 
         this.peerRenderer = new GameElement(peerParent);
-        //this.peerRenderer.renderFrom(this.peerStateAt(0));
+        
+        // Show wait screen.
+        this.renderer.renderWaitScreen();
+        this.peerRenderer.renderWaitScreen();
+
         this.reconcileIndex = 0;
+
+        this.frameTimes = [];
     }
 
 
@@ -41,6 +47,16 @@ export default class OnlineDriver extends LocalDriver {
             Game.start(this.state);
             Game.start(this.peerStateAt(0));
             
+            // Start countdown, set to T-3.
+            
+            for (let i=3; i>0; i--) {
+                let time = new Date(startTime - i * 1000);
+
+                setTimeout( () => {
+                    this.renderer.renderCountDown(this.state, i);
+                    this.peerRenderer.renderCountDown(this.peerStateAt(0), i);
+                }, time - new Date().getTime() );
+            } 
             setTimeout( () => {
                 // Start listeners
                 document.addEventListener('keydown', this.handleKeyDown);
@@ -117,7 +133,6 @@ export default class OnlineDriver extends LocalDriver {
                     shouldSpawnGarbage = true;
             }
             // Recalculate
-            console.log(inputs);
             Game.process(state, inputs);  
             // Send attacks to local game
             if (state.attack > 0) this.state.garbage.push(state.attack);
@@ -165,6 +180,11 @@ export default class OnlineDriver extends LocalDriver {
         // Send heartbeat 
         if (this.frameIndex % HEARTBEAT_RATE == 0) this.publishEvent('heartbeat');
 
+        // Frame time log
+        if (this.frameIndex < 1000) 
+            this.frameTimes.push([startTime, new Date().getTime()]);
+        if (this.frameIndex == 1000) 
+            console.log(this.frameTimes);
         // Call function again if not over, else render gameover screen
         const timeElapsed = new Date().getTime() - startTime.getTime();
         if (!this.over && !this.state.over && !this.peerStateAt(this.frameIndex).over) {
