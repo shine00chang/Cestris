@@ -86,20 +86,28 @@ export default class Game {
             const d = Math.min( rawAttack, this.state.garbage[0] );
             this.state.garbage[0] -= d;
             rawAttack -= d;
-            if (this.state.garbage[0] == 0) this.state.garbage.shift();
+            if (this.state.garbage[0] == 0) 
+                this.state.garbage.shift();
         }
         this.state.attack = rawAttack;
     }
 
     // Inserts rows of garbage.
     static #spawnGarbage () {
-        let rowsSpawned = 0;
+        const garbage = this.state.garbage;
+        let sum = 0;
 
         // For each attack (since rows from the same attack has the same column)
-        for (let i=0; i<this.state.garbage.length; i++) {
+        while (sum < k.GARBAGE_CAP && garbage.length > 0) {
             // Make sure rows doesn't exceed Garbage cap.
             this.state.acceptedGarbage = true;
-            let spawn = Math.max(this.state.garbage[i], this.state.garbage[i] - (k.GARBAGE_CAP - rowsSpawned));
+            let spawn = garbage.shift();
+            sum += spawn;
+            if (sum > k.GARBAGE_CAP) {
+                spawn -= sum - k.GARBAGE_CAP;
+                garbage.unshift(sum - k.GARBAGE_CAP);
+            }
+            
             // Shift board up by 'spawn'
             for (let y=0; y<20 - spawn; y++) 
                 for (let x=0; x<10; x++) 
@@ -111,12 +119,7 @@ export default class Game {
             for (let r=0; r<spawn; r++) 
                 for (let x=0; x<10; x++) 
                     this.state.grid[(19 - r) * 10 + x] = x == column ? undefined : 'garbage';
-
-            rowsSpawned += spawn;
-            this.state.garbage[i] -= spawn;
         };
-        // Remove processed attacks.
-        this.state.garbage.filter(row => row != 0);
     }
 
     // Moves piece if there is no conflict. Returns whether or not the move happened (for DAS system)
@@ -244,7 +247,8 @@ export default class Game {
                     this.#calcAttack();
 
                     // Spawn Garbage
-                    if(shouldSpawnGarbage) this.#spawnGarbage();
+                    if(this.state.clear == 'none' && shouldSpawnGarbage) 
+                        this.#spawnGarbage();
 
                     this.#nextPiece();
                 }

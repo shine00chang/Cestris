@@ -31,9 +31,8 @@ export default class OnlineDriver extends LocalDriver {
 
     startOnline = () => {
         // On receiving 'online-start', sets to start game at the given start time
-        this.socket.on('online-start', data => {
-            const startTime = data.startTime;
-            
+        this.socket.on('online-start', data => setTimeout( () => {
+
             // Initalize states (now possible with seed value)
             this.state = new State();
             // Seed random functions
@@ -47,25 +46,29 @@ export default class OnlineDriver extends LocalDriver {
             Game.start(this.state);
             Game.start(this.peerStateAt(0));
             
-            // Start countdown, set to T-3.
-            
-            for (let i=3; i>0; i--) {
-                let time = new Date(startTime - i * 1000);
-
-                setTimeout( () => {
-                    this.renderer.renderCountDown(this.state, i);
-                    this.peerRenderer.renderCountDown(this.peerStateAt(0), i);
-                }, time - new Date().getTime() );
-            } 
-            setTimeout( () => {
+            // Lambda to run at the end of countdown
+            const onStart = () => {
                 // Start listeners
                 document.addEventListener('keydown', this.handleKeyDown);
                 document.addEventListener('keyup', this.handleKeyUp);
                 this.startPeers();
                 this.onFrame();
+            }
 
-            }, startTime - new Date().getTime() );
-        });
+            // Start countdown, set to T-3.
+            let countdown = 3;
+            const onCountdown = () => {
+                this.renderer.renderCountDown(this.state, countdown);
+                this.peerRenderer.renderCountDown(this.peerStateAt(0), countdown--);
+
+                if (countdown == 0) {
+                    onStart();
+                    return;
+                }
+                setTimeout(onCountdown, 1000);
+            };
+            setTimeout(onCountdown, 1000);
+        }, data.offset));
     }  
 
     peerInputsAt = (frame) => {
@@ -98,7 +101,7 @@ export default class OnlineDriver extends LocalDriver {
             // frame already commited to. Remove all records up to the new offset.
             for (let f = this.recordIndex; f < Math.min(this.frameIndex, data.frame-60); f++ ) 
                 this.peerRecord.shift();
-            this.recordIndex = Math.min(this.frameIndex, data.frame-60);
+            this.recordIndex = Math.max(0, Math.min(this.frameIndex, data.frame-60));
             
             // Add to input
             this.peerInputsAt(data.frame).push(data.event);
