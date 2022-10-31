@@ -6,37 +6,59 @@
 
     </head>
     <body>
-        <h1>Cestris</h1>
-        <p id='error' style="color: red"></p>
-        <label for="roomid">Room ID: </label>
-        <input id="roomid-input" name="roomid"></input>
-        <label for="name">Username: </label>
-        <input id="name-input" name="name"></input> <br>
-        <button id="online-join-button">Online-Join</button>
-        <button id="online-ready-button" style="display: none">Online-Ready</button>
-        <button id="local-button">Local</button>
-         
-        <div id="debug"></div>
+        <div id="online-prompt" class="prompt" style="display: none;">
+            <label for="roomid">Room ID: </label>
+            <input id="roomid-input" name="roomid"></input> <br>
+            <label for="name">Username: </label>
+            <input id="name-input" name="name"></input> <br>
+            <button id="online-prompt-cancel">Cancel</button>
+            <button id="online-prompt-submit">Ok</button>
+        </div>
 
-        <div style="display:flex">
-            <div id="main-view" style="margin: 10px"> Game:<br> </div>
-            <div id="remote-view" style="margin: 10px"> Remote:<br> </div>
+        <div id="filter"></div>
+
+        <div class="title-box" id="title-box"> 
+            <div class="title">Cestris</div>
+            <p id='error' style="color: red"></p>
+        </div>
+
+
+        <div id="home-menu" class="menu-box"> 
+            <button id="online-join-button">Online-Join</button> <br>
+            <button id="local-button">Local</button> <br>
+        </div>
+
+
+        <div id="online-menu" class="menu-box">
+            <button id="online-ready-button" style="display: none">Online-Ready</button> <br>
+        </div>
+
+
+
+        <div id="main-box">
+            <div id="room-view">
+                <p>Room ID: </p><p id="roomId"></p>
+                <lu id="member-list"> 
+                    Members: <br>
+                </lu> <br>
+
+                <div id="chat-box"> 
+                    Chat: <br>
+                    <lu id="chat-stream">
+                        <li> This is the chat stream </li>
+                    </lu>
+                    <form id="chat-form">
+                        <input id="chat-form-input" autocomplete="off" /><button>Send</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="main-view" class="game-box"> Game:<br> </div>
+            <div id="remote-view" class="game-box"> Remote:<br> </div>
         </div>
         
-        <p>Room ID: </p><p id="roomId"></p>
-        <lu id="member-list"> 
-            Members: <br>
-        </lu> <br>
-        <div id="chat-box"> 
-            Chat: <br>
-            <lu id="chat-stream">
-                <li> This is the chat stream </li>
-            </lu>
-            <form id="chat-form">
-                <input id="chat-form-input" autocomplete="off" /><button>Send</button>
-            </form>
-        </div>
 
+    
         <script type="module" src="./index.js"></script>
     </body>
 </html>
