@@ -33,6 +33,7 @@ function slideMenuOut (elem) {
 
 function  activatePrompt (elem) {
     elem.style.display = 'inline';
+    elem.style.opacity = 1;
     document.getElementById('filter').style.opacity = 0.5;
 }
 
@@ -45,7 +46,8 @@ function startGameView () {
 
 
 function decativatePrompt (elem) {
-    elem.style.display = 'none';
+    setTimeout(() => elem.style.display = 'none', 1000);
+    elem.style.opacity = 0;
     document.getElementById('filter').style.opacity = 0;
 }
 
@@ -153,7 +155,6 @@ function onOnlineReady () {
     if (game !== undefined) return;
     startGameView();
     slideMenuOut(document.getElementById('online-menu'));
-
 
     socket.emit('online-ready');
 

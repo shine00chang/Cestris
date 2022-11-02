@@ -280,7 +280,7 @@ export default class Game {
                 case 'ArrowLeft':
                 case 'ArrowRight':
                     const d = key == 'ArrowLeft' ? -1 : 1
-                    if (type === 'down' && state.DAStick == 0) {
+                    if (type === 'down' && (state.DAStick == 0 || state.DASd != d)) {
                         // If this is the first keydown, move once
                         this.#movePiece(d);
 

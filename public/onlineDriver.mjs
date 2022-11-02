@@ -43,14 +43,15 @@ export default class OnlineDriver extends LocalDriver {
             // Run seed-dependent initializations. 
             Game.initialize(this.state);
             Game.initialize(this.peerStateAt(0));
-            Game.start(this.state);
-            Game.start(this.peerStateAt(0));
             
             // Lambda to run at the end of countdown
             const onStart = () => {
+                Game.start(this.state);
+                Game.start(this.peerStateAt(0));
+
                 // Start listeners
-                document.addEventListener('keydown', this.handleKeyDown);
-                document.addEventListener('keyup', this.handleKeyUp);
+                this.renderer.box.addEventListener('keydown', this.handleKeyDown);
+                this.renderer.box.addEventListener('keyup', this.handleKeyUp);
                 this.startPeers();
                 this.onFrame();
             }
@@ -61,13 +62,13 @@ export default class OnlineDriver extends LocalDriver {
                 this.renderer.renderCountDown(this.state, countdown);
                 this.peerRenderer.renderCountDown(this.peerStateAt(0), countdown--);
 
-                if (countdown == 0) {
+                if (countdown < 0) {
                     onStart();
                     return;
                 }
                 setTimeout(onCountdown, 1000);
             };
-            setTimeout(onCountdown, 1000);
+            onCountdown();
         }, data.offset));
     }  
 

@@ -121,11 +121,6 @@ startListeners = (socket) => {
         delete clients[socket.id];
     });
 
-    // On 'chat message', Broadcast incomming chat messages
-    socket.on('chat message', (data) => {
-        console.log('message: ', data.msg);
-        io.emit('chat message', data);
-    });
 
     // On 'online-join', Push new user into active sockets list. 
     socket.on('online-join', (data) => {
@@ -167,6 +162,11 @@ startListeners = (socket) => {
 
         // Return sucessful acknowledge event 
         socket.emit('online-join-ack', {roomId: client.roomId, peerNames: room.clients.map(client => client.name)});
+
+        // Start chat message event listening
+        socket.on('chat message', (data) => {
+            room.clients.forEach(client => client.socket.emit('chat message', data) );
+        });
 
         // Broadcast new peer event 'online-join'
         room.clients.forEach( peer => {

@@ -3,10 +3,11 @@ import * as k from './config.mjs';
 export default class GameElement {
     constructor (parent) {
         this.box = document.createElement('div');
+        this.box.className = 'game-box';
         this.canvas = document.createElement('canvas');
         this.canvas.className = 'game-board';
         this.canvas.width = 400;
-        this.canvas.height = 400;
+        this.canvas.height = 500;
         
         this.box.appendChild(this.canvas);
         parent.appendChild(this.box);
@@ -19,12 +20,12 @@ export default class GameElement {
         const ctx = this.canvas.getContext("2d");
 
         // Reset 
-        ctx.fillStyle = 'rgb(0,0,0)';
-        ctx.fillRect(0, 0, 360, 400);
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
 
         const cx = 80;
-        const cy = 0;
+        const cy = 50;
         // Draw Grid 
         ctx.strokeStyle = '#666';
         ctx.lineWidth = 1;
@@ -57,7 +58,7 @@ export default class GameElement {
 
         // Draw ghost 
         if (state.piece !== undefined && !over) {
-            ctx.globalAlpha = 0.25;
+            ctx.globalAlpha = 0.75;
             const p = state.piece;
             const gy = state.ghostY;
             const len = Math.sqrt(k.PIECE_MAPS[p.type][p.r].length);
@@ -86,7 +87,7 @@ export default class GameElement {
             const p = state.hold;
             const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
             const cx = 10;
-            const cy = 10;
+            const cy = 60;
             const s = 15;
             for (let y = 0; y<len; y++) 
                 for (let x = 0; x<len; x++) 
@@ -101,7 +102,7 @@ export default class GameElement {
             const p = state.queue[i];
             const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
             const cx = 300;
-            const cy = 10 + 50 * i;
+            const cy = 60 + 50 * i;
             const s = 15;
             for (let y = 0; y<len; y++) 
                 for (let x = 0; x<len; x++) 
@@ -118,14 +119,14 @@ export default class GameElement {
         ctx.fillRect(cx - 4, (20 - garbage) * k.SIZE , 4, garbage * k.SIZE);
 
         // Draw Combo Indicator
-        if (state.combo > 2) {
+        if (state.combo > 1) {
             ctx.font = '14px serif';
-            ctx.fillText(`Combo x${state.combo}`, 10, 100);
+            ctx.fillText(`Combo x${state.combo}`, 10, 120);
         }
         // Draw B2B Indicator
-        if (state.b2b > 0) {
+        if (state.b2b > 1) {
             ctx.font = '20px serif';
-            ctx.fillText(`B2B x${state.b2b}`, 10, 150);
+            ctx.fillText(`B2B x${state.b2b}`, 10, 180);
         }
     }
     renderCountDown (state, countdown) {
@@ -133,11 +134,11 @@ export default class GameElement {
         const ctx = this.canvas.getContext("2d");
 
         // Reset 
-        ctx.fillStyle = 'rgb(0,0,0)';
-        ctx.fillRect(0, 0, 360, 400);
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         const cx = 80;
-        const cy = 0;
+        const cy = 50;
         // Draw Grid 
         ctx.strokeStyle = '#666';
         ctx.lineWidth = 1;
@@ -159,7 +160,7 @@ export default class GameElement {
             const p = state.queue[i];
             const len = Math.sqrt(k.PIECE_MAPS[p][p == "I" ? 2 : 0].length);
             const cx = 300;
-            const cy = 10 + 50 * i;
+            const cy = 60 + 50 * i;
             const s = 15;
             for (let y = 0; y<len; y++) 
                 for (let x = 0; x<len; x++) 
@@ -170,16 +171,16 @@ export default class GameElement {
         }  
 
         // Draw Countdown tick
-        ctx.fillStyle = 'rgb(200,200,0)';
-        ctx.font = '20px serif';
-        ctx.fillText(`${countdown}`, this.canvas.width / 2 - 5, this.canvas.height / 2 - 10);
+        ctx.fillStyle = 'rgb(240,240,60)';
+        ctx.font = '50px serif';
+        ctx.fillText(`${countdown}`, cx + 5 * k.SIZE - 20, cy + 10 * k.SIZE - 20);
     }
     renderWaitScreen () {
         const ctx = this.canvas.getContext("2d");
 
         // Reset 
-        ctx.fillStyle = 'rgb(0,0,0)';
-        ctx.fillRect(0, 0, 360, 400);
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         ctx.fillStyle = 'rgb(200,200,0)';
         ctx.font = '20px serif';

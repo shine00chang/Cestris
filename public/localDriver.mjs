@@ -17,6 +17,7 @@ export default class LocalDriver {
         this.configs = {};
     
         this.renderer = new Renderer(parent);
+        this.renderer.box.tabIndex = "0";
     }
 
     destruct = () => {
@@ -27,21 +28,36 @@ export default class LocalDriver {
         this.renderer.destruct();
 
         // Stop listeners 
-        document.removeEventListener('keyup', this.handleKeyDown);
-        document.removeEventListener('keydown', this.handleKeyUp);
+        this.renderer.box.removeEventListener('keyup', this.handleKeyDown);
+        this.renderer.box.removeEventListener('keydown', this.handleKeyUp);
     }
 
     start = () => {
         // Initialize    
         Game.initialize(this.state);
-        Game.start(this.state);
 
-        // Start listeners
-        document.addEventListener('keydown', this.handleKeyDown);
-        document.addEventListener('keyup', this.handleKeyUp);
-        
-        // Start ticks
-        this.onFrame();
+        // Lambda to run at the end of countdown
+        const onStart = () => {
+            Game.start(this.state);
+
+            // Start listeners
+            this.renderer.box.addEventListener('keydown', this.handleKeyDown);
+            this.renderer.box.addEventListener('keyup', this.handleKeyUp);
+            this.onFrame();
+        }
+
+        // Start countdown, set to T-3.
+        let countdown = 3;
+        const onCountdown = () => {
+            this.renderer.renderCountDown(this.state, countdown--);
+
+            if (countdown < 0) {
+                onStart();
+                return;
+            }
+            setTimeout(onCountdown, 1000);
+        };
+        onCountdown();
     }
 
 

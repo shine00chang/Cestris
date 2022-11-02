@@ -6,13 +6,13 @@
 
     </head>
     <body>
-        <div id="online-prompt" class="prompt" style="display: none;">
-            <label for="roomid">Room ID: </label>
+        <div id="online-prompt" class="prompt" style="display: none; opacity: 0;">
+            <label for="roomid">Room ID: </label><br>
             <input id="roomid-input" name="roomid"></input> <br>
-            <label for="name">Username: </label>
-            <input id="name-input" name="name"></input> <br>
-            <button id="online-prompt-cancel">Cancel</button>
-            <button id="online-prompt-submit">Ok</button>
+            <label for="name">Username: </label><br>
+            <input id="name-input" name="name"></input> <br><br>
+            <button id="online-prompt-cancel" class="prompt-button">Cancel</button>
+            <button id="online-prompt-submit" class="prompt-button">Ok</button>
         </div>
 
         <div id="filter"></div>
@@ -38,23 +38,22 @@
         <div id="main-box">
             <div id="room-view">
                 <p>Room ID: </p><p id="roomId"></p>
-                <lu id="member-list"> 
+                <div id="member-view"> 
                     Members: <br>
-                </lu> <br>
+                    <div id="member-list"> 
+                        
+                    </div>
+                </div> <br>
 
-                <div id="chat-box"> 
+                <div id="chat-view"> 
                     Chat: <br>
-                    <lu id="chat-stream">
-                        <li> This is the chat stream </li>
-                    </lu>
-                    <form id="chat-form">
-                        <input id="chat-form-input" autocomplete="off" /><button>Send</button>
-                    </form>
+                    <div id="chat-stream"> </div>
+                    <input id="chat-input" autocomplete="off" />
                 </div>
             </div>
 
-            <div id="main-view" class="game-box"> Game:<br> </div>
-            <div id="remote-view" class="game-box"> Remote:<br> </div>
+            <div id="main-view"></div>
+            <div id="remote-view"></div>
         </div>
         
 

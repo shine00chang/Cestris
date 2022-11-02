@@ -6,7 +6,9 @@ html, body {
     height: 100vh;
     overflow: hidden;
 }
-
+li {
+    list-style: none;
+}
 .game-board {
     border: 2px;
 }
@@ -32,7 +34,7 @@ html, body {
     transform: translateX(-50%);
     text-align: center;
 
-    transition: 1s ease-in-out;
+    transition: 500ms ease-in-out;
 }
 .prompt {
     position: absolute;
@@ -41,14 +43,16 @@ html, body {
 
     z-index: 10;
     border-radius: 4px;
-    background: #666; 
-    padding: 4px;
+    background: #eee; 
+    padding: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
     transform: translate(-50%, -50%);
 
-    transition: 500s;
+    transition: 200ms;
 }
 #filter {
-    background-color: #666;
+    background-color: #000;
     opacity: 0;
     transition: 500ms;
     position: absolute;
@@ -57,6 +61,11 @@ html, body {
     width: 100%;
     height: 100%;
 }
+input {
+    border: none;
+    border-radius: 6px;
+    padding: 4px;
+}
 button {
     border: 0px;
     padding: 10px;
@@ -64,6 +73,10 @@ button {
     background: #eee;
     border-radius: 8px; 
     transition: 0.3s;
+}
+.prompt-button {
+    width: 40%;
+    background: #fff;
 }
 button:hover {
     background-color: #6ad2cb;
@@ -75,19 +88,38 @@ button:hover {
     left: 0%;
 
     width: 100%;
-    height: 80%;
+    height: 90%;
 
     display: flex;
     transition: 1s;
 }
 #room-view {
-    width: 150px;
-    height: 100%;
+    width: 200px;
+    height: 90%;
     margin: 6px;
     background: #eee;
     border-radius: 6px;
     padding: 6px;
 }
+#member-view {
+    height: 40%;
+}
+#chat-view {
+    font-size: 12px;
+}
+#chat-stream {
+    height: 200px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+#chat-input {
+    width: -webkit-fill-available;
+}
+.message-box {
+    border-bottom: dotted 1px #444;
+}
 .game-box {
     margin: 6px;
+    border-radius: 12px;
+    overflow: hidden;
 }
