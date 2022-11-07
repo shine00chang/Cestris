@@ -79,7 +79,14 @@ button {
     background: #fff;
 }
 button:hover {
-    background-color: #6ad2cb;
+    background: #6ad2cb;
+    color: white;
+}
+#online-ready-button {
+    background: #fff;
+}
+#online-ready-button:hover {
+    background: #6ad2cb;
     color: white;
 }
 #main-box {
@@ -102,15 +109,30 @@ button:hover {
     padding: 6px;
 }
 #member-view {
-    height: 40%;
+    height: 42%;
+}
+.member-element {
+    background: #fff;
+    border-radius: 5px;
+    border: 'none';
+    padding: 3px;
+    margin-bottom: 2px;
+}
+.member-name {
+    display: inline-block;
+}
+.member-button {
+    padding: 1px;
 }
 #chat-view {
     font-size: 12px;
+    height: 50%;
 }
 #chat-stream {
-    height: 200px;
+    height: 80%;
     overflow: hidden;
     overflow-y: scroll;
+    margin-bottom: 6px;
 }
 #chat-input {
     width: -webkit-fill-available;

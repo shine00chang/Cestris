@@ -32,11 +32,14 @@ function generateString(length) {
 class Room {
     clients = [];
     inGame = false;
+    running = false;
     constructor (id) {
         this.id = id;
     }
 
     startGame = () => {
+        this.running = true;
+
         const startTime = new Date();
         const randSeeds = [generateString(10), generateString(10)];
         startTime.setSeconds(startTime.getSeconds() + 3);
@@ -72,6 +75,7 @@ class Client {
     constructor (name, socket) {
         this.name = name;
         this.ready = false;
+        this.active = false;
         this.socket = socket;
     }
 }
@@ -97,7 +101,7 @@ onTick = () => {
 
 startListeners = (socket) => {
 
-    // On 'disconnect', remove records.
+    // On 'disconnect', remove records, transfer admin.
     socket.on('disconnect', function() {
         console.log('Client disconnected: ', socket.id);
         if (clients[socket.id] === undefined) return;
@@ -105,16 +109,24 @@ startListeners = (socket) => {
         const client = clients[socket.id];
         const room = rooms[client.roomId];
 
+
         // Remove from room
-        room.clients.forEach( peer => peer.socket.emit('online-disconnect', {peerName: peer.name}) );
+        room.clients.forEach( peer => peer.socket.emit('online-disconnect', {peerName: client.name}) );
         const index = rooms[client.roomId].clients.indexOf(client);
         room.clients.splice(index, 1);
-
+                
         // If empty, destroy room
         console.log(room.clients);
         if (room.clients.length == 0) {
             delete rooms[room.id];
             console.log('destroyed room');
+        }
+
+        // Transfer admin if needed.
+        if (room && client == room.admin) {
+            room.admin = room.clients[0];
+            // Broadcast admin change.
+            room.clients.forEach( peer => peer.socket.emit('online-member-admin', {name: room.admin.name}) );
         }
             
         // Destroy client
@@ -137,7 +149,7 @@ startListeners = (socket) => {
             });
             return;
         } 
-        // If room Id empty (new room)
+        // If room Id empty, create new room
         if (data.roomId == '') {
             const id = _.uniqueId();
             rooms[id] = new Room(id);
@@ -160,18 +172,29 @@ startListeners = (socket) => {
         clients[socket.id] = client;
         room.clients.push( client );
 
+        // If is new room, set user as admin.
+        if (room.clients.length == 1)
+            room.admin = client;
+        
         // Return sucessful acknowledge event 
-        socket.emit('online-join-ack', {roomId: client.roomId, peerNames: room.clients.map(client => client.name)});
+        socket.emit('online-join-ack', {
+            roomId: client.roomId, 
+            name: client.name,
+            peerNames: room.clients.map(client => client.name),
+            readyMembers: room.clients.filter(client => client.ready).map(client => client.name),
+            activeMembers: room.clients.filter(client => client.active).map(client => client.name),
+            admin: room.admin.name,
+        });
 
         // Start chat message event listening
         socket.on('chat message', (data) => {
-            room.clients.forEach(client => client.socket.emit('chat message', data) );
+            room.clients.forEach( client => client.socket.emit('chat message', data) );
         });
 
         // Broadcast new peer event 'online-join'
         room.clients.forEach( peer => {
             if (peer == client) return;
-            peer.socket.emit('online-join', {peerName: client.name});
+            peer.socket.emit('online-join', {name: client.name});
         }) 
         console.log('accepted join request to room: ', room.id);
     });
@@ -187,24 +210,66 @@ startListeners = (socket) => {
         const client = clients[socket.id];
         const room = rooms[client.roomId];
 
-        console.log("client '%s' ready for game in room '%s'. ", client.name, room.id);
         if (client === undefined || room === undefined) return;
-        
-        client.ready = true;
+        if (!client.active) return;
+        if (client.ready == data.ready) return;
 
-        // Check number of peers, if only one, don't start.
-        if (room.clients.length == 1) 
-            return;
-        // Check peers in room for start
-        let shouldStart = true;
-        room.clients.forEach( peer => {
-            if (!peer.ready) shouldStart = false;
+        client.ready = data.ready;
+
+        // Broadcast ready state change to peers.
+        room.clients.forEach(peer => {
+            peer.socket.emit('online-member-ready', {name: client.name, ready: data.ready});
         });
-        
-        // Start game
-        if (shouldStart) 
-            room.startGame();
+
+        if (data.ready) {
+            if (room.running) return;
+            // Check number of peers, if only one, don't start.
+            if (room.clients.length == 1) return;
+
+            // Check peers in room for start and broadcast ready message.
+            let shouldStart = true;
+            room.clients.forEach( peer => {
+                if (!peer.ready) shouldStart = false;
+            });
+            
+            // Start game
+            if (shouldStart) 
+                room.startGame();
+        }
     })
+
+    // On 'online-admin-set-active', changes 'active' state of user in room.
+    socket.on('online-admin-set-active', data => {
+        const client = clients[socket.id];
+        if (!client) return;
+
+        const room = rooms[client.roomId];
+        // If not admin
+        if (client != room.admin) {
+            console.log("Fradulent Admin event from: ", socket.id);
+            return;
+        }
+        
+        const peer = room.clients.find( client => client.name == data.name );
+        if (!peer) return;
+
+        // If already have 2 actives, and the targeted peer is not active, reject
+        if (!peer.active) {
+            let actives = 0;
+            room.clients.forEach( client => actives += client.active );
+            if (actives == 2) {
+                console.log("Already 2 active players, rejecting.");
+                return;
+            }
+        }
+        peer.active = !peer.active;
+        console.log('online-admin-set-active event recieved, changing: ', peer.name);
+
+        // Broadcast active state change to peers.
+        room.clients.forEach(client => {
+            client.socket.emit('online-member-active', {name: peer.name, active: peer.active});
+        });
+    });
 }
 
 io.on('connection', (socket) => {

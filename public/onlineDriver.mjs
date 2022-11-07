@@ -29,47 +29,42 @@ export default class OnlineDriver extends LocalDriver {
     }
 
 
-    startOnline = () => {
-        // On receiving 'online-start', sets to start game at the given start time
-        this.socket.on('online-start', data => setTimeout( () => {
+    startOnline = (seeds) => {
+        // Initalize states (now possible with seed value)
+        this.state = new State();
+        // Seed random functions
+        this.seeds = seeds;
+        State.setSeed(this.state, seeds);
+        State.setSeed(this.peerStateAt(0), seeds);
+        // Run seed-dependent initializations. 
+        Game.initialize(this.state);
+        Game.initialize(this.peerStateAt(0));
+        
+        // Lambda to run at the end of countdown
+        const onStart = () => {
+            Game.start(this.state);
+            Game.start(this.peerStateAt(0));
 
-            // Initalize states (now possible with seed value)
-            this.state = new State();
-            // Seed random functions
-            console.log("randSeeds: ", data.randSeeds);
-            this.seeds = data.randSeeds;
-            State.setSeed(this.state, data.randSeeds);
-            State.setSeed(this.peerStateAt(0), data.randSeeds);
-            // Run seed-dependent initializations. 
-            Game.initialize(this.state);
-            Game.initialize(this.peerStateAt(0));
-            
-            // Lambda to run at the end of countdown
-            const onStart = () => {
-                Game.start(this.state);
-                Game.start(this.peerStateAt(0));
+            // Start listeners
+            this.renderer.box.addEventListener('keydown', this.handleKeyDown);
+            this.renderer.box.addEventListener('keyup', this.handleKeyUp);
+            this.startPeers();
+            this.onFrame();
+        }
 
-                // Start listeners
-                this.renderer.box.addEventListener('keydown', this.handleKeyDown);
-                this.renderer.box.addEventListener('keyup', this.handleKeyUp);
-                this.startPeers();
-                this.onFrame();
+        // Start countdown, set to T-3.
+        let countdown = 3;
+        const onCountdown = () => {
+            this.renderer.renderCountDown(this.state, countdown);
+            this.peerRenderer.renderCountDown(this.peerStateAt(0), countdown--);
+
+            if (countdown < 0) {
+                onStart();
+                return;
             }
-
-            // Start countdown, set to T-3.
-            let countdown = 3;
-            const onCountdown = () => {
-                this.renderer.renderCountDown(this.state, countdown);
-                this.peerRenderer.renderCountDown(this.peerStateAt(0), countdown--);
-
-                if (countdown < 0) {
-                    onStart();
-                    return;
-                }
-                setTimeout(onCountdown, 1000);
-            };
-            onCountdown();
-        }, data.offset));
+            setTimeout(onCountdown, 1000);
+        };
+        onCountdown();
     }  
 
     peerInputsAt = (frame) => {
@@ -178,7 +173,6 @@ export default class OnlineDriver extends LocalDriver {
         peerNextState.attack = 0;
 
         this.frameIndex ++;
-        //document.getElementById('debug').innerText = "" + this.frameIndex;
         this.reconcileIndex = this.frameIndex;
 
         // Send heartbeat 
