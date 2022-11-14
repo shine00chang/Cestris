@@ -25,7 +25,11 @@ export default class OnlineDriver extends LocalDriver {
 
         this.reconcileIndex = 0;
 
+        // DEBUG
         this.frameTimes = [];
+        this.avgDelta = 0;
+        this.avgElapsed = 0;
+        this.avgError = 0;
     }
 
 
@@ -177,16 +181,35 @@ export default class OnlineDriver extends LocalDriver {
 
         // Send heartbeat 
         if (this.frameIndex % HEARTBEAT_RATE == 0) this.publishEvent('heartbeat');
-
-        // Frame time log
-        if (this.frameIndex < 1000) 
-            this.frameTimes.push([startTime, new Date().getTime()]);
-        if (this.frameIndex == 1000) 
-            console.log(this.frameTimes);
-        // Call function again if not over, else render gameover screen
-        const timeElapsed = new Date().getTime() - startTime.getTime();
-        if (!this.over && !this.state.over && !this.peerStateAt(this.frameIndex).over) {
-            setTimeout(this.onFrame, Math.max(0, 1000 / FRAME_RATE - timeElapsed));
+        // DEBUG
+        // Frame time log. (For server to assess desynchronization)
+        this.frameTimes.push(startTime.getTime());
+        if (this.frameTimes.length > 200) {
+            this.socket.emit('online-frameTimes', {times: this.frameTimes});
+            this.frameTimes.length = 0;
         }
+
+        // Calculate Time.
+        const timeError = this.scheduledTickTime ? startTime.getTime() - this.scheduledTickTime : 0;
+        const timeElapsed = new Date().getTime() - startTime.getTime();
+        const waitTime = Math.max(0, 1000 / FRAME_RATE - timeElapsed - timeError);
+        this.scheduledTickTime = new Date().getTime() + waitTime;
+
+        // DEBUG
+        if (this.lastFrameTime == 0) 
+            this.lastFrameTime = new Date().getTime();
+        else
+            this.avgDelta = (this.avgDelta + (startTime.getTime() - this.lastFrameTime)) / (this.avgDelta ? 2 : 1);
+        this.avgError = (this.avgError + timeError) / (this.avgError ? 2 : 1);
+        this.avgElapsed = (this.avgElapsed + timeElapsed) / (this.avgElapsed ? 2 : 1);
+
+        this.lastFrameTime = startTime.getTime();
+
+        console.log("avg Error %d, avg Delta: %d, av Elapsed: %d", this.avgError, this.avgDelta, this.avgElapsed);
+
+
+        // Call function again if not over, else render gameover screen
+        if (!this.over && !this.state.over && !this.peerStateAt(this.frameIndex).over) 
+            setTimeout(this.onFrame, Math.max(0, waitTime));
     }
 }

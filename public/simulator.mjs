@@ -15,15 +15,14 @@ if (this.frameIndex == 2000) {
 }
 */
 
-export default function simulate (inputsRecord, seeds) {
-    const renderer = new GameElement(document.getElementById('debug-view'));
+export default function simulate(inputsRecord, seeds) {
+    const renderer = new GameElement(document.getElementById("debug-view"));
     const state = new State();
     State.setSeed(state, seeds);
     Game.initialize(state);
     Game.start(state);
-    
-    for (const inputs of inputsRecord) 
-        Game.process(state, inputs);
+
+    for (const inputs of inputsRecord) Game.process(state, inputs);
 
     renderer.renderFrom(state);
 }

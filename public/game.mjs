@@ -1,99 +1,104 @@
-import * as k from './config.mjs';
-import { State, Piece } from './state.mjs';
-
+import * as k from "./config.mjs";
+import { State, Piece } from "./state.mjs";
 
 export default class Game {
-    static state; 
-    
-    static #drawFromBag () {
-        if (this.state.bag.length === 0) 
-            this.state.bag = [...k.PIECES];
-        const index = Math.floor( State.rand(this.state.randState) * this.state.bag.length );
+    static state;
+
+    static #drawFromBag() {
+        if (this.state.bag.length === 0) this.state.bag = [...k.PIECES];
+        const index = Math.floor(
+            State.rand(this.state.randState) * this.state.bag.length
+        );
         return this.state.bag.splice(index, 1)[0];
     }
 
-    static #checkConflict () {
+    static #checkConflict() {
         const p = this.state.piece;
 
-        for (let y=0; y<p.mapSize; y++) 
-            for (let x=0; x<p.mapSize; x++) 
+        for (let y = 0; y < p.mapSize; y++)
+            for (let x = 0; x < p.mapSize; x++)
                 if (Piece.map(p, x, y) == 1) {
-                    if (p.x + x >= 10 || p.x + x < 0 || p.y + y >= 20 || p.y + y < 0) return false;
-                    if (this.state.grid[(p.y + y) * 10 + p.x + x] != undefined) return false;
-                } 
+                    if (
+                        p.x + x >= 10 ||
+                        p.x + x < 0 ||
+                        p.y + y >= 20 ||
+                        p.y + y < 0
+                    )
+                        return false;
+                    if (this.state.grid[(p.y + y) * 10 + p.x + x] != undefined)
+                        return false;
+                }
         return true;
     }
 
-    static #removeClears () {
+    static #removeClears() {
         // Check t-spin: 3-point rule
         let tspin = false;
-        if (this.state.piece.type == 'T' && this.state.piece.didSpin) {
+        if (this.state.piece.type == "T" && this.state.piece.didSpin) {
             let cnt = 0;
             const p = this.state.piece;
             const occupy = (x, y) => {
                 if (x < 0 || y < 0 || x >= 20 || y >= 10) return true;
                 return this.state.grid[y * 20 + x] != undefined;
-            }
-            if (occupy(p.x, p.y)) cnt ++;
-            if (occupy(p.x, p.y+2)) cnt ++;
-            if (occupy(p.x+2, p.y)) cnt ++;
-            if (occupy(p.x+2, p.y+2)) cnt ++; 
+            };
+            if (occupy(p.x, p.y)) cnt++;
+            if (occupy(p.x, p.y + 2)) cnt++;
+            if (occupy(p.x + 2, p.y)) cnt++;
+            if (occupy(p.x + 2, p.y + 2)) cnt++;
             tspin = cnt >= 3;
         }
 
         let clears = 0;
-        for (let y=19; y>=0; y--) {
+        for (let y = 19; y >= 0; y--) {
             let clear = true;
-            for (let x=0; x<10; x++) {
-                if (this.state.grid[y * 10 + x] === undefined)
-                    clear = false;
+            for (let x = 0; x < 10; x++) {
+                if (this.state.grid[y * 10 + x] === undefined) clear = false;
                 if (clears) {
-                    this.state.grid[(y+clears) * 10 + x] = this.state.grid[y * 10 + x];
+                    this.state.grid[(y + clears) * 10 + x] =
+                        this.state.grid[y * 10 + x];
                     this.state.grid[y * 10 + x] = undefined;
                 }
             }
-            if (clear)
-                clears ++;
+            if (clear) clears++;
         }
         let clear = "";
-        if (tspin && clears != 0) clear = 'tspin ';
-        if (clears == 0) clear += 'none';
-        if (clears == 1) clear += 'single';
-        if (clears == 2) clear += 'double';
-        if (clears == 3) clear += 'triple';
-        if (clears == 4) clear += 'tetris'; 
+        if (tspin && clears != 0) clear = "tspin ";
+        if (clears == 0) clear += "none";
+        if (clears == 1) clear += "single";
+        if (clears == 2) clear += "double";
+        if (clears == 3) clear += "triple";
+        if (clears == 4) clear += "tetris";
         return clear;
     }
     // Calculates the outgoing attack based on clear, b2b, combos and incomming garbage.
-    static #calcAttack () {
+    static #calcAttack() {
         const clear = this.state.clear;
 
-        if (clear == 'none') {
+        if (clear == "none") {
             this.state.combo = 0;
             return;
         }
-        this.state.combo ++;
-        if (k.B2B_CLEARS.includes(clear)) 
-            this.state.b2b ++;
-        else 
-            this.state.b2b  = 0;
+        this.state.combo++;
+        if (k.B2B_CLEARS.includes(clear)) this.state.b2b++;
+        else this.state.b2b = 0;
         let b2b_level = 0;
-        while (this.b2b > k.B2B_LEVELS[b2b_level]) b2b_level++; 
+        while (this.b2b > k.B2B_LEVELS[b2b_level]) b2b_level++;
 
-
-        let rawAttack = k.ATTACK_MAP[clear] + k.COMBO_TABLE[this.state.combo] + k.B2B_LEVELS[b2b_level]; 
+        let rawAttack =
+            k.ATTACK_MAP[clear] +
+            k.COMBO_TABLE[this.state.combo] +
+            k.B2B_LEVELS[b2b_level];
         while (rawAttack != 0 && this.state.garbage.length != 0) {
-            const d = Math.min( rawAttack, this.state.garbage[0] );
+            const d = Math.min(rawAttack, this.state.garbage[0]);
             this.state.garbage[0] -= d;
             rawAttack -= d;
-            if (this.state.garbage[0] == 0) 
-                this.state.garbage.shift();
+            if (this.state.garbage[0] == 0) this.state.garbage.shift();
         }
         this.state.attack = rawAttack;
     }
 
     // Inserts rows of garbage.
-    static #spawnGarbage () {
+    static #spawnGarbage() {
         const garbage = this.state.garbage;
         let sum = 0;
 
@@ -107,23 +112,27 @@ export default class Game {
                 spawn -= sum - k.GARBAGE_CAP;
                 garbage.unshift(sum - k.GARBAGE_CAP);
             }
-            
+
             // Shift board up by 'spawn'
-            for (let y=0; y<20 - spawn; y++) 
-                for (let x=0; x<10; x++) 
-                    this.state.grid[y * 10 + x] = this.state.grid[(y+spawn) * 10 + x];
+            for (let y = 0; y < 20 - spawn; y++)
+                for (let x = 0; x < 10; x++)
+                    this.state.grid[y * 10 + x] =
+                        this.state.grid[(y + spawn) * 10 + x];
 
             // Generate random garbage hole column.
-            let column = Math.floor(State.rand(this.state.garbageRandState) * 10);
+            let column = Math.floor(
+                State.rand(this.state.garbageRandState) * 10
+            );
             // Add Garbage rows
-            for (let r=0; r<spawn; r++) 
-                for (let x=0; x<10; x++) 
-                    this.state.grid[(19 - r) * 10 + x] = x == column ? undefined : 'garbage';
-        };
+            for (let r = 0; r < spawn; r++)
+                for (let x = 0; x < 10; x++)
+                    this.state.grid[(19 - r) * 10 + x] =
+                        x == column ? undefined : "garbage";
+        }
     }
 
     // Moves piece if there is no conflict. Returns whether or not the move happened (for DAS system)
-    static #movePiece (delta) {
+    static #movePiece(delta) {
         const p = this.state.piece;
         p.x += delta;
         if (!this.#checkConflict()) {
@@ -137,7 +146,7 @@ export default class Game {
     }
 
     // Finds first valid spin, checks for kicks.
-    static #spinPiece (delta) {
+    static #spinPiece(delta) {
         const p = this.state.piece;
         const prevR = p.r;
         p.r = (p.r + delta) % 4;
@@ -146,15 +155,15 @@ export default class Game {
         // Generate trials
         const offset1 = k.KICK_TABLE[p.type == "I" ? 1 : 0][prevR];
         const offset2 = k.KICK_TABLE[p.type == "I" ? 1 : 0][p.r];
-        
+
         let kicks = [];
-        for (let i=0; i<5; i++) {
+        for (let i = 0; i < 5; i++) {
             kicks.push({
                 x: offset1[i].x - offset2[i].x,
-                y: offset1[i].y - offset2[i].y
+                y: offset1[i].y - offset2[i].y,
             });
         }
-        for (let i=0; i<5; i++) {
+        for (let i = 0; i < 5; i++) {
             p.x += kicks[i].x;
             p.y -= kicks[i].y;
             if (this.#checkConflict()) {
@@ -169,44 +178,44 @@ export default class Game {
     }
 
     // Adds drop tick to piece
-    static #softDrop () {
+    static #softDrop() {
         let p = this.state.piece;
         p.tick += k.SOFT_DROP_SPEED;
     }
-    
+
     // Find lowest possible position of piece
-    static #hardDrop () {
+    static #hardDrop() {
         let p = this.state.piece;
 
-        while (this.#checkConflict()) p.y ++; 
-        p.y --;
+        while (this.#checkConflict()) p.y++;
+        p.y--;
         // Inform 'tick()' to lock the piece.
         p.tick = k.LOCK_LIMIT;
     }
-    
+
     // Writes piece to grid.
-    static #lockPiece () {
+    static #lockPiece() {
         // Set didHold to false
         this.state.didHold = false;
 
         const p = this.state.piece;
 
-        for (let y=0; y<p.mapSize; y++) 
-            for (let x=0; x<p.mapSize; x++) 
+        for (let y = 0; y < p.mapSize; y++)
+            for (let x = 0; x < p.mapSize; x++)
                 if (Piece.map(p, x, y) == 1)
                     this.state.grid[(p.y + y) * 10 + p.x + x] = p.type;
     }
-    
+
     // Gets new piece, update queue
-    static #nextPiece () {
+    static #nextPiece() {
         this.state.piece = new Piece(this.state.queue.shift());
-        this.state.queue.push( this.#drawFromBag() );
+        this.state.queue.push(this.#drawFromBag());
     }
-    
-    // Saving the current piece in hold state and drawing the next piece. 
-    static #holdPiece () {
+
+    // Saving the current piece in hold state and drawing the next piece.
+    static #holdPiece() {
         if (this.state.didHold) return;
-        
+
         this.state.didHold = true;
         if (this.state.hold === undefined) {
             this.state.hold = this.state.piece.type;
@@ -214,31 +223,31 @@ export default class Game {
             return;
         }
         const temp = this.state.piece.type;
-        this.state.piece = new Piece(this.state.hold)
+        this.state.piece = new Piece(this.state.hold);
         this.state.hold = temp;
     }
-    static #getGhostPos () {
+    static #getGhostPos() {
         const p = this.state.piece;
         const temp = p.y;
         do {
-            p.y ++;
+            p.y++;
         } while (this.#checkConflict());
         this.state.ghostY = p.y - 1;
         p.y = temp;
     }
 
     // Tick
-    static #tick (shouldSpawnGarbage = true) {
+    static #tick(shouldSpawnGarbage = true) {
         const p = this.state.piece;
-        p.tick += k.GRAVITY_SPEED; 
+        p.tick += k.GRAVITY_SPEED;
 
         // If tick is up, Lower piece.
         if (p.tick >= k.TICK_LIMIT) {
-            p.y ++;
+            p.y++;
 
             // If conflict, lock & get new piece if lock limit.
             if (!this.#checkConflict()) {
-                p.y --;
+                p.y--;
 
                 // If lock
                 if (p.tick >= k.LOCK_LIMIT) {
@@ -247,7 +256,7 @@ export default class Game {
                     this.#calcAttack();
 
                     // Spawn Garbage
-                    if(this.state.clear == 'none' && shouldSpawnGarbage) 
+                    if (this.state.clear == "none" && shouldSpawnGarbage)
                         this.#spawnGarbage();
 
                     this.#nextPiece();
@@ -256,31 +265,39 @@ export default class Game {
                 p.tick = 0;
             }
         }
-        // Set ghost piece y-position 
+        // Set ghost piece y-position
         this.#getGhostPos();
     }
 
-    static #checkOver () {
+    static #checkOver() {
         const p = this.state.piece;
 
-        for (let y=0; y<p.mapSize; y++) 
-            for (let x=0; x<p.mapSize; x++) 
-                if (Piece.map(p, x, y) == 1 && this.state.grid[(p.y + y) * 10 + p.x + x] !== undefined) 
+        for (let y = 0; y < p.mapSize; y++)
+            for (let x = 0; x < p.mapSize; x++)
+                if (
+                    Piece.map(p, x, y) == 1 &&
+                    this.state.grid[(p.y + y) * 10 + p.x + x] !== undefined
+                )
                     return true;
         return false;
     }
-    
-    static process( state, inputs, shouldSpawnGarbage = true ) {
+
+    static process(state, inputs, shouldSpawnGarbage = true) {
         this.state = state;
 
-        inputs.forEach( input => {
-            const [key, type] = input.split('-');
+        inputs.forEach((input) => {
+            const [key, type, tag] = input.split("-");
+            if (tag == 'future') 
+                console.log("processed future event");
 
             switch (key) {
-                case 'ArrowLeft':
-                case 'ArrowRight':
-                    const d = key == 'ArrowLeft' ? -1 : 1
-                    if (type === 'down' && (state.DAStick == 0 || state.DASd != d)) {
+                case "ArrowLeft":
+                case "ArrowRight":
+                    const d = key == "ArrowLeft" ? -1 : 1;
+                    if (
+                        type === "down" &&
+                        (state.DAStick == 0 || state.DASd != d)
+                    ) {
                         // If this is the first keydown, move once
                         this.#movePiece(d);
 
@@ -288,37 +305,38 @@ export default class Game {
                         state.DAStick = 1;
                         state.ARRtick = 0;
                         state.DASd = d;
-                
-                    // If keyup, stop DAS
-                    } if (type === 'up') 
-                        state.DAStick = 0;
+
+                        // If keyup, stop DAS
+                    }
+                    if (type === "up") state.DAStick = 0;
                     break;
-                case 'ArrowDown':
+                case "ArrowDown":
                     state.softDropping = type == "down";
                     break;
-                case 'ArrowUp':
-                case 'z':
-                case 'a':
-                    if (type === 'down') this.#spinPiece(key == 'z' ? -1 : key == 'a' ? 2 : 1);
+                case "ArrowUp":
+                case "z":
+                case "a":
+                    if (type === "down")
+                        this.#spinPiece(key == "z" ? -1 : key == "a" ? 2 : 1);
                     break;
-                case 'c':
-                    if (type == 'down') this.#holdPiece();
+                case "c":
+                    if (type == "down") this.#holdPiece();
                     break;
-                case ' ':
-                    if (type === 'down') this.#hardDrop();
+                case " ":
+                    if (type === "down") this.#hardDrop();
                     break;
             }
         });
         if (state.softDropping) this.#softDrop();
         if (state.DAStick) {
-            state.DAStick ++;
+            state.DAStick++;
         }
         if (state.DAStick >= k.DAS_LIMIT) {
             // Instant Auto shift to edge.
             if (k.ARR_LIMIT == 0) {
                 while (this.#movePiece(state.DASd));
             } else {
-                state.ARRtick ++;
+                state.ARRtick++;
                 if (state.ARRtick >= k.ARR_LIMIT) {
                     this.#movePiece(state.DASd);
                     state.ARRtick = 0;
@@ -328,18 +346,16 @@ export default class Game {
         this.#tick(shouldSpawnGarbage);
         // Check if game over (piece has conflict w/ board), if over, lock piece, signal driver to stop.
         state.over = this.#checkOver();
-        if (state.over) 
-            this.#lockPiece();
+        if (state.over) this.#lockPiece();
     }
 
-    static initialize (state) {
+    static initialize(state) {
         this.state = state;
-        for (let i=0; i<5; i++) 
-            this.state.queue.push( this.#drawFromBag() ); 
+        for (let i = 0; i < 5; i++) this.state.queue.push(this.#drawFromBag());
     }
 
-    static start (state) {
+    static start(state) {
         this.state = state;
         this.#nextPiece();
-    } 
+    }
 }

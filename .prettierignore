@@ -1,0 +1,8 @@
+*.*
+
+!public/*
+!views/*
+!index.js
+!package.json
+
+config.mjs
