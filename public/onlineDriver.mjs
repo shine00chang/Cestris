@@ -30,6 +30,7 @@ export default class OnlineDriver extends LocalDriver {
         this.avgDelta = 0;
         this.avgElapsed = 0;
         this.avgError = 0;
+        this.lastFrameTime = 0;
     }
 
 
@@ -74,17 +75,18 @@ export default class OnlineDriver extends LocalDriver {
     peerInputsAt = (frame) => {
         const index = frame - this.recordIndex;
         // If references a frame not yet created.
-        while (index >= this.peerRecord.length) {
-            this.peerRecord.push({state: structuredClone(this.peerRecord.at(-1).state), inputs: []});
-        }
+        while (index >= this.peerRecord.length) 
+            this.peerRecord.push({state: undefined, inputs: []});
+        
         return this.peerRecord[index].inputs;
     }
     peerStateAt = (frame) => {
-        const index = frame - this.recordIndex;
-        // If references a frame not yet created.
-        while (index >= this.peerRecord.length) {
-            this.peerRecord.push({state: structuredClone(this.peerRecord.at(-1).state), inputs: []});
+        // Accessing a yet-to-be initialized state. Unexpected call, most likely a problem.
+        if (frame - this.recordIndex >= this.peerRecord.length) {
+            console.log("Attempted to access peer state beyond record length.");
+            return;
         }
+        const index = frame - this.recordIndex;
         return this.peerRecord[index].state;
     }
 
@@ -123,20 +125,21 @@ export default class OnlineDriver extends LocalDriver {
     // i.e. frame +1 will be the first frame reconciled.
     // Stops reconcilation at current frame.
     reconcile = (frame) => {
-        for (let f = frame; f < this.frameIndex; f++) {
+        for (let f = frame; f <= this.frameIndex; f++) {
             const index = f - this.recordIndex;
-            const inputs = this.peerInputsAt(f);
-            const state = this.peerRecord[index+1].state = structuredClone(this.peerStateAt(f));
-        
-            // Check if peer accepted garbage
-            let shouldSpawnGarbage = false;
-            {
-                const index = inputs.indexOf('garbage-accept');
-                if (index != -1) 
-                    shouldSpawnGarbage = true;
+            if (index < 0) {
+                console.log("Attempted to reconcile already-closed frame.");
+                continue;
             }
+
+            const inputs = this.peerInputsAt(f);
+            if (index + 1 == this.peerRecord.length) 
+                this.peerRecord.push({state: undefined, inputs: []});
+            const state = this.peerRecord[index+1].state = structuredClone(this.peerRecord[index].state);
+
+        
             // Recalculate
-            Game.process(state, inputs);  
+            Game.process(state, inputs, inputs.includes('garbage-accept'));  
             // Send attacks to local game
             if (state.attack > 0) this.state.garbage.push(state.attack);
             state.attack = 0;
@@ -159,22 +162,19 @@ export default class OnlineDriver extends LocalDriver {
         // Reconcile
         this.reconcile(this.reconcileIndex);
         
+        /*
         const peerInputs = this.peerInputsAt(this.frameIndex);
-        const peerNextState = this.peerStateAt(this.frameIndex + 1);
-        // Check if garbage accepted
-        let shouldSpawnGarbage = false;
-        const index = peerInputs.indexOf('garbage-accept');
-        if (index != -1) 
-            shouldSpawnGarbage = true;
+        const state = this.peerStateAt(this.frameIndex +1);
         
-        Game.process(peerNextState, peerInputs, shouldSpawnGarbage);
+        Game.process(peerNextState, peerInputs, peerInputs.includes("garbage-accept"));
+        */
         this.peerRenderer.renderFrom(this.peerStateAt(this.frameIndex +1));
         
         // Player-to-Player interactions, i.e. attacks.
         if (this.state.attack > 0) this.peerStateAt(this.frameIndex + 1).garbage.push(this.state.attack);
         this.state.attack = 0;
-        if (peerNextState.attack > 0) this.state.garbage.push(peerNextState.attack);
-        peerNextState.attack = 0;
+        //if (peerNextState.attack > 0) this.state.garbage.push(peerNextState.attack);
+        //peerNextState.attack = 0;
 
         this.frameIndex ++;
         this.reconcileIndex = this.frameIndex;
