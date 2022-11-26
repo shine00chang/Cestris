@@ -54,6 +54,7 @@ class Room {
             client.socket.emit("online-start", {
                 startTime: startTime.getTime(),
                 randSeeds: randSeeds,
+                peerConfig: {},
             })
         );
 
@@ -73,36 +74,39 @@ class Room {
             });
 
             // DEBUG - Check frame sync
-            client.socket.on("online-frameTimes", data => {
+            client.socket.on("online-frameTimes", (data) => {
                 console.log(`Got frameTimes data from: ${client.socket.id}.`);
                 client.frameTimes = data.times;
 
                 let shouldCheck = true;
-                for (const peer of this.clients) 
-                    if (peer.frameTimes.length == 0)
-                        shouldCheck = false;
+                for (const peer of this.clients)
+                    if (peer.frameTimes.length == 0) shouldCheck = false;
 
                 if (shouldCheck) {
                     console.log("Checking times...");
                     const cnt = new Array(1000).fill(0);
                     const range = 1;
-                    
+
                     let l = cnt.length;
                     let r = 0;
-                    for (let i=0; i<200; i++) {
-                        const d = Math.abs(this.clients[0].frameTimes[i] - this.clients[1].frameTimes[i]);
+                    for (let i = 0; i < 200; i++) {
+                        const d = Math.abs(
+                            this.clients[0].frameTimes[i] -
+                                this.clients[1].frameTimes[i]
+                        );
                         const index = Math.floor(d / range);
-                        cnt[Math.min(index, cnt.length - 1)] ++;
+                        cnt[Math.min(index, cnt.length - 1)]++;
                         l = Math.min(index, l);
                         r = Math.max(index, r);
                     }
-                    for (let i=l; i<r; i++) {
+                    for (let i = l; i < r; i++) {
                         let str = "";
-                        for (let j=0; j<cnt[i]; j++) str += "*";
-                        console.log(`${i*range}-${i*range+range-1}: ${str}`);
+                        for (let j = 0; j < cnt[i]; j++) str += "*";
+                        console.log(
+                            `${i * range}-${i * range + range - 1}: ${str}`
+                        );
                     }
-                    for (const peer of this.clients) 
-                        peer.frameTimes.length = 0;
+                    for (const peer of this.clients) peer.frameTimes.length = 0;
                 }
             });
         });
@@ -159,8 +163,8 @@ startListeners = (socket) => {
             console.log("destroyed room");
         }
 
-        // If room was running, signal stop/forfeit 
-        room.clients.forEach((peer) => 
+        // If room was running, signal stop/forfeit
+        room.clients.forEach((peer) =>
             peer.socket.emit("online-event", { event: "forfeit" })
         );
         room.running = false;

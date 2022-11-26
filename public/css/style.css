@@ -145,3 +145,6 @@ button:hover {
     border-radius: 12px;
     overflow: hidden;
 }
+.game-box:focus {
+    outline: none;
+}

@@ -5,7 +5,7 @@ import Renderer from "./renderer.mjs";
 import { FRAME_RATE } from "./config.mjs";
 
 export default class LocalDriver {
-    constructor(parent) {
+    constructor(parent, config) {
         this.over = false;
         this.frameIndex = 0;
 
@@ -14,7 +14,7 @@ export default class LocalDriver {
         this.state = new State();
 
         this.keys = {};
-        this.configs = {};
+        this.config = config;
 
         this.renderer = new Renderer(parent);
         this.renderer.box.tabIndex = "0";
@@ -52,6 +52,7 @@ export default class LocalDriver {
             this.renderer.renderCountDown(this.state, countdown--);
 
             if (countdown < 0) {
+                this.renderer.box.focus();
                 onStart();
                 return;
             }
@@ -75,7 +76,7 @@ export default class LocalDriver {
         this.inputs.push(e);
     };
     onFrame = () => {
-        Game.process(this.state, this.inputs);
+        Game.process(this.config, this.state, this.inputs);
         this.renderer.renderFrom(this.state);
 
         this.inputs = [];

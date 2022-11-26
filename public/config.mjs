@@ -223,13 +223,9 @@ export const B2B_CLEARS = [
     "tspin triple",
 ];
 
-export const SOFT_DROP_SPEED = 10;
 export const GRAVITY_SPEED = 0;
 export const TICK_LIMIT = 10;
 export const LOCK_LIMIT = Math.max(TICK_LIMIT, 200);
-
-export const DAS_LIMIT = 8;
-export const ARR_LIMIT = 0;
 
 export const SIZE = 20;
 

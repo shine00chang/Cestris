@@ -3,6 +3,7 @@ import { State, Piece } from "./state.mjs";
 
 export default class Game {
     static state;
+    static config;
 
     static #drawFromBag() {
         if (this.state.bag.length === 0) this.state.bag = [...k.PIECES];
@@ -180,7 +181,7 @@ export default class Game {
     // Adds drop tick to piece
     static #softDrop() {
         let p = this.state.piece;
-        p.tick += k.SOFT_DROP_SPEED;
+        p.tick += this.config.SDF;
     }
 
     // Find lowest possible position of piece
@@ -282,13 +283,13 @@ export default class Game {
         return false;
     }
 
-    static process(state, inputs, shouldSpawnGarbage = true) {
+    static process(config, state, inputs, shouldSpawnGarbage = true) {
         this.state = state;
+        this.config = config;
 
         inputs.forEach((input) => {
             const [key, type, tag] = input.split("-");
-            if (tag == 'future') 
-                console.log("processed future event");
+            if (tag == "future") console.log("processed future event");
 
             switch (key) {
                 case "ArrowLeft":
@@ -331,16 +332,15 @@ export default class Game {
         if (state.DAStick) {
             state.DAStick++;
         }
-        if (state.DAStick >= k.DAS_LIMIT) {
+        if (state.DAStick >= this.config.DAS) {
             // Instant Auto shift to edge.
-            if (k.ARR_LIMIT == 0) {
+            if (this.config.ARR == 0) {
                 while (this.#movePiece(state.DASd));
             } else {
                 state.ARRtick++;
-                if (state.ARRtick >= k.ARR_LIMIT) {
-                    this.#movePiece(state.DASd);
-                    state.ARRtick = 0;
-                }
+                const v = Math.floor(state.ARRtick / this.config.ARR);
+                for (let i = 0; i < v; i++) this.#movePiece(state.DASd);
+                state.ARRtick -= v * this.config.ARR;
             }
         }
         this.#tick(shouldSpawnGarbage);

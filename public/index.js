@@ -12,6 +12,16 @@ let chat;
 let username;
 let roomId;
 let admin = false;
+const config = {
+    DAS: 10,
+    ARR: 1,
+    SDF: 10,
+};
+
+// Error dispaly
+function setError(err) {
+    document.getElementById("error").innerText = err;
+}
 
 // Animations
 function titleToConerTransition() {
@@ -29,18 +39,19 @@ function slideMenuOut(elem) {
     elem.style.opacity = 0;
 }
 
-function activatePrompt(elem) {
-    elem.style.display = "inline";
-    elem.style.opacity = 1;
-    document.getElementById("filter").style.opacity = 0.5;
-}
-
+// Slides in Game view, moves title.
 function startGameView(online = false) {
     titleToConerTransition();
 
     if (online) document.getElementById("room-view").style.display = "inline";
     document.getElementById("main-box").style.display = "flex";
     document.getElementById("main-box").style.top = "10%";
+}
+
+function activatePrompt(elem) {
+    elem.style.display = "inline";
+    elem.style.opacity = 1;
+    document.getElementById("filter").style.opacity = 0.5;
 }
 
 function decativatePrompt(elem) {
@@ -50,19 +61,51 @@ function decativatePrompt(elem) {
 }
 
 // Callbacks on UI events
+const onConfig = () => {
+    activatePrompt(document.getElementById("config-prompt"));
+};
+
+const onConfigSave = () => {
+    const SDF = document.getElementById("SDF-input").value;
+    const DAS = document.getElementById("DAS-input").value;
+    const ARR = document.getElementById("ARR-input").value;
+
+    // Validate values.
+    if (SDF < 1 || SDF > 10) {
+        setError("Invalid SDF.");
+        return;
+    }
+    if (DAS < 1 || DAS > 20) {
+        setError("Invalid DAS.");
+        return;
+    }
+    if (ARR < 0 || ARR > 5) {
+        setError("Invalid ARR.");
+        return;
+    }
+
+    // Set config values.
+    config.SDF = SDF;
+    config.DAS = DAS;
+    config.ARR = ARR;
+
+    decativatePrompt(document.getElementById("config-prompt"));
+};
+
 const onOnlineJoin = () => {
     if (game !== undefined) return;
 
     // Activate user & room ID prompt.
     activatePrompt(document.getElementById("online-prompt"));
 };
+
 const onLocal = () => {
     // Change to game view.
     startGameView();
     slideMenuOut(document.getElementById("home-menu"));
 
     // Create game object.
-    game = new LocalDriver(document.getElementById("main-view"));
+    game = new LocalDriver(document.getElementById("main-view"), config);
 
     // Start driver-level control (key) listeners.
     document.getElementById("main-view").addEventListener("keyup", (e) => {
@@ -70,7 +113,10 @@ const onLocal = () => {
         if (e.key == "r") {
             game.destruct();
             setTimeout(() => {
-                game = new LocalDriver(document.getElementById("main-view"));
+                game = new LocalDriver(
+                    document.getElementById("main-view"),
+                    config
+                );
                 game.start();
             }, 200);
         }
@@ -87,8 +133,7 @@ function onlinePromptSubmit() {
 
     // Check if valid name
     if (nameIn.length < 3) {
-        document.getElementById("error").innerText =
-            "Name too short, at least 3 characters.";
+        setError("Name too short, at least 3 characters.");
         return;
     }
     socket.emit("online-join", { roomId: roomIdIn, name: nameIn });
@@ -99,7 +144,7 @@ function onlinePromptSubmit() {
             onJoinRoom(data);
         } else {
             // else, display error
-            document.getElementById("error").innerText = data.message;
+            setError(data.message);
         }
         socket.off("online-join-ack");
     });
@@ -118,7 +163,8 @@ const onJoinRoom = (data) => {
     game = new OnlineDriver(
         document.getElementById("main-view"),
         document.getElementById("remote-view"),
-        socket
+        socket,
+        config
     );
     chat = new Chat(socket, document.getElementById("chat-box"));
 
@@ -235,7 +281,7 @@ function onOnlineReady() {
     // On receiving 'online-start', sets to start game at the given start time
     socket.on("online-start", (data) =>
         setTimeout(() => {
-            game.startOnline(data.randSeeds);
+            game.startOnline(data);
         }, data.offset)
     );
 
@@ -257,9 +303,17 @@ function onOnlineUnready() {
 }
 
 // Set callbacks
+// Home menu
+document.getElementById("config-button").onclick = onConfig;
 document.getElementById("local-button").onclick = onLocal;
-
 document.getElementById("online-join-button").onclick = onOnlineJoin;
+
+// Online-Join prompt
 document.getElementById("online-prompt-cancel").onclick = () =>
     decativatePrompt(document.getElementById("online-prompt"));
 document.getElementById("online-prompt-submit").onclick = onlinePromptSubmit;
+
+// Config prompt
+document.getElementById("config-prompt-cancel").onclick = () =>
+    decativatePrompt(document.getElementById("config-prompt"));
+document.getElementById("config-prompt-save").onclick = onConfigSave;
