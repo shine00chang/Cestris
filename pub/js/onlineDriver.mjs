@@ -1,5 +1,5 @@
 import Game from "./game.mjs";
-import GameElement from "./renderer.mjs";
+import Renderer from "./renderer.mjs";
 import { State } from "./state.mjs";
 import { FRAME_RATE, HEARTBEAT_RATE } from "./config.mjs";
 import LocalDriver from "./localDriver.mjs";
@@ -17,7 +17,7 @@ export default class OnlineDriver extends LocalDriver {
         this.frameOffset = 0;
         this.reconcileIndex = 0;
 
-        this.peerRenderer = new GameElement(peerParent);
+        this.peerRenderer = new Renderer(peerParent);
 
         // Show wait screen.
         this.renderer.renderWaitScreen();

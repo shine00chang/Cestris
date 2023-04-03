@@ -287,7 +287,8 @@ export default class Game {
         this.state = state;
         this.config = config;
 
-        inputs.forEach((input) => {
+        inputs.forEach( input => {
+			console.log(input);
             const [key, type, tag] = input.split("-");
             if (tag == "future") console.log("processed future event");
 

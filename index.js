@@ -12,14 +12,13 @@ const FRAME_RATE = 30;
 
 app.use(express.json());
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static("pub"));
 
 app.get("/", (req, res) => {
     res.render("index.ejs");
 });
 
-const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 function generateString(length) {
     let result = " ";
     const charactersLength = characters.length;

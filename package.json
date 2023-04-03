@@ -18,15 +18,14 @@
         "prettier": "^2.7.1"
     },
     "nodemonConfig": {
-        "ignore": [
-            "views/*.*",
-            "public/*.*"
-        ]
+
     },
     "prettier": {
         "tabWidth": 4
     },
     "scripts": {
+        "dev": "nodemon index.js",
+        "start": "node index.js",
         "prettier": "prettier --write ."
     }
 }

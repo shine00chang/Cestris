@@ -67,6 +67,9 @@ export class State {
         state[2] = (state[2] + t) | 0;
         return (t >>> 0) / 4294967296;
     }
+    static genSeed() {
+    	return [generateString(10), generateString(10)]; 
+    }
     static setSeed(state, seed) {
         state.randState = cyrb128(seed[0]);
         state.garbageRandState = cyrb128(seed[1]);

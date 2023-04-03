@@ -1,6 +1,6 @@
 import * as k from "./config.mjs";
 
-export default class GameElement {
+export default class Renderer {
     constructor(parent) {
         this.box = document.createElement("div");
         this.box.className = "game-box";
@@ -20,7 +20,7 @@ export default class GameElement {
         const ctx = this.canvas.getContext("2d");
 
         // Reset
-        ctx.fillStyle = "#eee";
+        ctx.fillStyle = "#222";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const cx = 80;
@@ -149,7 +149,7 @@ export default class GameElement {
         const ctx = this.canvas.getContext("2d");
 
         // Reset
-        ctx.fillStyle = "#eee";
+        ctx.fillStyle = "#222";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const cx = 80;
@@ -198,7 +198,7 @@ export default class GameElement {
         const ctx = this.canvas.getContext("2d");
 
         // Reset
-        ctx.fillStyle = "#eee";
+        ctx.fillStyle = "#222";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         ctx.fillStyle = "rgb(200,200,0)";

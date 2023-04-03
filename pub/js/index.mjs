@@ -1,5 +1,6 @@
 import LocalDriver from "./localDriver.mjs";
 import OnlineDriver from "./onlineDriver.mjs";
+import BotDriver from "./botDriver.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
@@ -13,8 +14,8 @@ let username;
 let roomId;
 let admin = false;
 const config = {
-    DAS: 10,
-    ARR: 1,
+    DAS: 7,
+    ARR: 0,
     SDF: 10,
 };
 
@@ -92,13 +93,6 @@ const onConfigSave = () => {
     decativatePrompt(document.getElementById("config-prompt"));
 };
 
-const onOnlineJoin = () => {
-    if (game !== undefined) return;
-
-    // Activate user & room ID prompt.
-    activatePrompt(document.getElementById("online-prompt"));
-};
-
 const onLocal = () => {
     // Change to game view.
     startGameView();
@@ -107,7 +101,7 @@ const onLocal = () => {
     // Create game object.
     game = new LocalDriver(document.getElementById("main-view"), config);
 
-    // Start driver-level control (key) listeners.
+    // Start global-level control (key) listeners.
     document.getElementById("main-view").addEventListener("keyup", (e) => {
         // Key 'r' => Restart game.
         if (e.key == "r") {
@@ -124,6 +118,42 @@ const onLocal = () => {
 
     // Start game.
     game.start();
+};
+
+const onBot = () => {
+	// Change to game view
+	startGameView();
+	slideMenuOut(document.getElementById("home-menu"));
+
+	// Create game object
+	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config);
+
+	// Start global-level control (restart button)
+    document.getElementById("main-view").addEventListener("keyup", (e) => {
+        // Key 'r' => Restart game.
+        if (e.key == "r") {
+            game.destruct();
+            setTimeout(() => {
+                game = new LocalDriver(
+                    document.getElementById("main-view"),
+                    config
+                );
+                game.start();
+            }, 200);
+        }
+    });
+
+	// Start
+	game.start();
+}
+
+// ===== ONLINE HANDLERS ======
+
+const onOnlineJoin = () => {
+    if (game !== undefined) return;
+
+    // Activate user & room ID prompt.
+    activatePrompt(document.getElementById("online-prompt"));
 };
 
 function onlinePromptSubmit() {
@@ -302,11 +332,13 @@ function onOnlineUnready() {
     document.getElementById("online-ready-button").onclick = onOnlineReady;
 }
 
-// Set callbacks
+// ======== SETTING CALLBACKS ======= 
+
 // Home menu
 document.getElementById("config-button").onclick = onConfig;
 document.getElementById("local-button").onclick = onLocal;
 document.getElementById("online-join-button").onclick = onOnlineJoin;
+document.getElementById("bot-button").onclick = onBot;
 
 // Online-Join prompt
 document.getElementById("online-prompt-cancel").onclick = () =>
