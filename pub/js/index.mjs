@@ -1,6 +1,7 @@
 import LocalDriver from "./localDriver.mjs";
 import OnlineDriver from "./onlineDriver.mjs";
 import BotDriver from "./botDriver.mjs";
+import { BotConfigs } from "./botWorker.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
@@ -16,8 +17,9 @@ let admin = false;
 const config = {
     DAS: 7,
     ARR: 0,
-    SDF: 10,
+    SDF: 1000,
 };
+
 
 // Error dispaly
 function setError(err) {
@@ -26,8 +28,8 @@ function setError(err) {
 
 // Animations
 function titleToConerTransition() {
-    document.getElementById("title-box").style.top = "30px";
-    document.getElementById("title-box").style.left = "70px";
+    document.getElementById("title-box").style.top = "5%";
+    document.getElementById("title-box").style.left = "7%";
 }
 
 function slideMenuIn(elem) {
@@ -62,6 +64,14 @@ function decativatePrompt(elem) {
 }
 
 // Callbacks on UI events
+const onHome = () => {
+    document.getElementById("title-box").style.top = "30%";
+    document.getElementById("title-box").style.left = "50%";
+	game.destruct();
+	document.getElementById("main-box").style.top = "100%";
+	slideMenuIn(document.getElementById("home-menu"));
+};
+
 const onConfig = () => {
     activatePrompt(document.getElementById("config-prompt"));
 };
@@ -126,7 +136,7 @@ const onBot = () => {
 	slideMenuOut(document.getElementById("home-menu"));
 
 	// Create game object
-	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config);
+	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, new BotConfigs());
 
 	// Start global-level control (restart button)
     document.getElementById("main-view").addEventListener("keyup", (e) => {
@@ -335,6 +345,7 @@ function onOnlineUnready() {
 // ======== SETTING CALLBACKS ======= 
 
 // Home menu
+document.getElementById("title-box").onclick = onHome; 
 document.getElementById("config-button").onclick = onConfig;
 document.getElementById("local-button").onclick = onLocal;
 document.getElementById("online-join-button").onclick = onOnlineJoin;

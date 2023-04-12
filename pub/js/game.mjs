@@ -191,7 +191,8 @@ export default class Game {
         while (this.#checkConflict()) p.y++;
         p.y--;
         // Inform 'tick()' to lock the piece.
-        p.tick = k.LOCK_LIMIT;
+		p.tick = k.TICK_LIMIT;
+        p.lock_tick = k.LOCK_LIMIT;
     }
 
     // Writes piece to grid.
@@ -243,29 +244,30 @@ export default class Game {
         p.tick += k.GRAVITY_SPEED;
 
         // If tick is up, Lower piece.
-        if (p.tick >= k.TICK_LIMIT) {
+        while (p.tick >= k.TICK_LIMIT) {
             p.y++;
+			if (!this.#checkConflict()) {
+				p.y--;
+				p.lock_tick += k.LOCK_SPEED;
+				// If lock
+				if (p.lock_tick >= k.LOCK_LIMIT) {
+					this.#lockPiece();
+					this.state.clear = this.#removeClears();
+					this.#calcAttack();
 
-            // If conflict, lock & get new piece if lock limit.
-            if (!this.#checkConflict()) {
-                p.y--;
+					// Spawn Garbage
+					if (this.state.clear == "none" && shouldSpawnGarbage)
+						this.#spawnGarbage();
 
-                // If lock
-                if (p.tick >= k.LOCK_LIMIT) {
-                    this.#lockPiece();
-                    this.state.clear = this.#removeClears();
-                    this.#calcAttack();
+					this.#nextPiece();
+				}
+				break;
+			} else {
+				p.tick -= k.TICK_LIMIT;
+			}
+		}
+		// If conflict, lock & get new piece if lock limit.
 
-                    // Spawn Garbage
-                    if (this.state.clear == "none" && shouldSpawnGarbage)
-                        this.#spawnGarbage();
-
-                    this.#nextPiece();
-                }
-            } else {
-                p.tick = 0;
-            }
-        }
         // Set ghost piece y-position
         this.#getGhostPos();
     }
@@ -288,7 +290,6 @@ export default class Game {
         this.config = config;
 
         inputs.forEach( input => {
-			console.log(input);
             const [key, type, tag] = input.split("-");
             if (tag == "future") console.log("processed future event");
 
@@ -313,6 +314,7 @@ export default class Game {
                     if (type === "up") state.DAStick = 0;
                     break;
                 case "ArrowDown":
+					if (type == "up" && inputs.includes("ArrowDown-down")) this.#softDrop();
                     state.softDropping = type == "down";
                     break;
                 case "ArrowUp":

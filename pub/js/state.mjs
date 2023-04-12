@@ -43,6 +43,7 @@ export class Piece {
         this.r = 0;
         this.mapSize = type == "I" ? 5 : 3;
         this.tick = 0;
+		this.lock_tick = 0;
         this.x = type == "I" ? 2 : 3;
         this.y = 0;
         this.didKick = false;

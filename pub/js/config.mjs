@@ -224,8 +224,9 @@ export const B2B_CLEARS = [
 ];
 
 export const GRAVITY_SPEED = 0;
+export const LOCK_SPEED = 0;
 export const TICK_LIMIT = 10;
-export const LOCK_LIMIT = Math.max(TICK_LIMIT, 200);
+export const LOCK_LIMIT = 10;
 
 export const SIZE = 20;
 

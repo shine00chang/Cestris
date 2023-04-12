@@ -2,32 +2,40 @@ import Game from "./game.mjs";
 import LocalDriver from "./localDriver.mjs";
 import { State } from "./state.mjs";
 import Renderer from "./renderer.mjs";
+import { BotConfigs } from "./botWorker.mjs";
 
 import { FRAME_RATE } from "./config.mjs";
 
 
 export default class BotDriver extends LocalDriver {
-	constructor (parent, botParent, config) { 
+	constructor (parent, botParent, config, botConfigs) { 
+		// Parameter checking
+		if (!(botConfigs instanceof BotConfigs)) {
+			console.error("Invalid bot configuration on game start, defaulting.");
+			botConfigs = new BotConfigs();
+		}
+
 		super(parent, config);
 
 		this.botRenderer = new Renderer(botParent);
 
 		this.botLastMove = new Date(0);
-		this.botInterval = 1000;
+		this.botInterval = botConfigs.delay * 1000;
 		this.botState = new State();
 		this.botInputs = [];
 
 		this.wasmWorker = new Worker('./js/botWorker.mjs', {type: "module"});
+		this.wasmWorker.postMessage(['config', botConfigs]);
 	}
 
-    destruct = () => {
+    destruct () {
 		super.destruct();
 
 		this.botRenderer.destruct();
 		this.wasmWorker.terminate();
     };
 
-	start = () => {
+	start () {
 		// Sync Seeds
 		const seeds = State.genSeed();
 		State.setSeed(this.state, seeds);
@@ -36,6 +44,9 @@ export default class BotDriver extends LocalDriver {
 		// Initialize
         Game.initialize(this.state);
         Game.initialize(this.botState);
+		
+		// Draw Once (so as to not be empty)
+		this.botRenderer.renderFrom(this.botState);
 
 		// Worker Callbacks
 		this.wasmWorker.onmessage = e => {
@@ -77,6 +88,7 @@ export default class BotDriver extends LocalDriver {
 	}
 
 	onFrame = () => {
+		if (this.inputs.includes("q-down")) return;
 		if (this.inputs.length > 0) console.log(this.inputs);
 		Game.process(this.config, this.state, this.inputs);
 		Game.process(this.config, this.botState, this.botInputs);

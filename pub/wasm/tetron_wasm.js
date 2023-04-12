@@ -99,6 +99,12 @@ export class Input {
         wasm.input_set_hold(this.ptr, p);
     }
     /**
+    * @param {number} d
+    */
+    set_depth(d) {
+        wasm.input_set_depth(this.ptr, d);
+    }
+    /**
     * @returns {Output}
     */
     run() {

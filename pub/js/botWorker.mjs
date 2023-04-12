@@ -1,8 +1,16 @@
 import init, { Input, Output, Piece } from '../wasm/tetron_wasm.js'
 
+
+export function BotConfigs (depth=2, pps=1.5) {
+	this.depth = depth;
+	this.delay = 1 / pps;
+}
+
 let wasm, memory;
 let loaded = false;
 let running = false;
+let configs = new BotConfigs();
+
 // Booter
 async function run () {
 	wasm = await init();
@@ -11,7 +19,6 @@ async function run () {
 	postMessage([`wasm loaded`]);
 }
 run ();
-
 
 function to_wasm_piece (js_v) {
 	if (js_v === undefined || js_v === null) return Piece.None;
@@ -40,6 +47,10 @@ const runBot = async (state) => {
 	running = true;
 	const input = Input.new();
 
+	{ // Write configs
+		input.set_depth(configs.dpeth);
+	}
+
 	{ // Parse CESTRIS.State into TETRON-WASM.Input
 		console.log(state);
 		// Write board
@@ -63,6 +74,12 @@ const runBot = async (state) => {
 	const keys = [];
 
 	{ // Parse output into array of keys
+		console.log({
+			x: output.x(),
+			r: output.r(),
+			hold: output.hold(),
+			s: output.s() 
+		});
 		const add = (k) => {
 			keys.push(k+"-down");
 			keys.push(k+"-up");
@@ -83,8 +100,9 @@ const runBot = async (state) => {
 		if (output.s() != -1) {
 			add("ArrowDown"); // Softdrop
 			let d = output.r() - output.s();
-			if (d ==  1) { add("up"); }
-			if (d == -1) { add("z"); }
+			if (d ==  1) add("up"); 
+			if (d == -1) add("z"); 
+			if (Math.abs(d) == 2) add("a"); 
 		}
 		add(" ");
 	}
@@ -96,6 +114,11 @@ const runBot = async (state) => {
 onmessage = e => {
 	const cmd = e.data[0];
 	switch (cmd) {
+	case "config":
+		configs = e.data[1];
+		console.log(configs);
+		
+		break;
 	case "run":
 		if (!loaded) {
 			postMessage(["still loading..."]);

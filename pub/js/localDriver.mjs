@@ -20,9 +20,13 @@ export default class LocalDriver {
         this.renderer.box.tabIndex = "0";
     }
 
-    destruct = () => {
+	stop () {
+		this.over = true;
+	}
+
+    destruct () {
         // Stop loop
-        this.over = true;
+       	this.stop(); 
 
         // Destroy HTML element
         this.renderer.destruct();
@@ -32,7 +36,7 @@ export default class LocalDriver {
         this.renderer.box.removeEventListener("keydown", this.handleKeyUp);
     };
 
-    start = () => {
+    start () {
         // Initialize
         Game.initialize(this.state);
 
