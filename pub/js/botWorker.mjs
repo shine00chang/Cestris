@@ -1,7 +1,7 @@
 import init, { Input, Output, Piece } from '../wasm/tetron_wasm.js'
 
 
-export function BotConfigs (depth=2, pps=1.5) {
+export function BotConfigs (depth=3, pps=3) {
 	this.depth = depth;
 	this.delay = 1 / pps;
 }
@@ -100,7 +100,7 @@ const runBot = async (state) => {
 		if (output.s() != -1) {
 			add("ArrowDown"); // Softdrop
 			let d = output.r() - output.s();
-			if (d ==  1) add("up"); 
+			if (d ==  1) add("ArrowUp"); 
 			if (d == -1) add("z"); 
 			if (Math.abs(d) == 2) add("a"); 
 		}

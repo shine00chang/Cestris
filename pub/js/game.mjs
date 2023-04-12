@@ -239,9 +239,8 @@ export default class Game {
     }
 
     // Tick
-    static #tick(shouldSpawnGarbage = true) {
+    static #checkTicks(shouldSpawnGarbage = true) {
         const p = this.state.piece;
-        p.tick += k.GRAVITY_SPEED;
 
         // If tick is up, Lower piece.
         while (p.tick >= k.TICK_LIMIT) {
@@ -285,7 +284,8 @@ export default class Game {
         return false;
     }
 
-    static process(config, state, inputs, shouldSpawnGarbage = true) {
+    static process(config, state, _inputs, shouldSpawnGarbage = true) {
+		let inputs = [..._inputs];
         this.state = state;
         this.config = config;
 
@@ -314,8 +314,15 @@ export default class Game {
                     if (type === "up") state.DAStick = 0;
                     break;
                 case "ArrowDown":
-					if (type == "up" && inputs.includes("ArrowDown-down")) this.#softDrop();
-                    state.softDropping = type == "down";
+					// If first Softdrop-down input, add tick & process
+					if (inputs.includes("ArrowDown-down") && inputs.includes("ArrowDown-up")) 
+						console.log("bot softdrop");
+					if (type === 'down' && state.softDropping === false) {
+						this.#softDrop();
+						this.#checkTicks();				
+					}
+					state.softDropping = type === 'down';
+
                     break;
                 case "ArrowUp":
                 case "z":
@@ -331,10 +338,12 @@ export default class Game {
                     break;
             }
         });
-        if (state.softDropping) this.#softDrop();
-        if (state.DAStick) {
+		// Softdrop Persistence 
+        if (state.softDropping && inputs.includes("ArrowDown-down") === false) this.#softDrop();
+
+		// DAS
+        if (state.DAStick) 
             state.DAStick++;
-        }
         if (state.DAStick >= this.config.DAS) {
             // Instant Auto shift to edge.
             if (this.config.ARR == 0) {
@@ -346,7 +355,11 @@ export default class Game {
                 state.ARRtick -= v * this.config.ARR;
             }
         }
-        this.#tick(shouldSpawnGarbage);
+
+		// Gravity
+		state.piece.tick += k.GRAVITY_SPEED;
+        this.#checkTicks(shouldSpawnGarbage);
+
         // Check if game over (piece has conflict w/ board), if over, lock piece, signal driver to stop.
         state.over = this.#checkOver();
         if (state.over) this.#lockPiece();
