@@ -2,10 +2,9 @@ import Game from "./game.mjs";
 import LocalDriver from "./localDriver.mjs";
 import { State } from "./state.mjs";
 import Renderer from "./renderer.mjs";
-//import { BotConfigs } from "./botWorker.mjs";
 import { FRAME_RATE } from "./config.mjs";
 
-
+const WORKER_PATH = IS_STATIC_PAGE ? './pub/js/botWorker.mjs' : './js/botWorker.mjs';
 export function BotConfigs (depth=2, pps=1.5) {
 	this.depth = depth;
 	this.delay = 1 / pps;
@@ -29,7 +28,7 @@ export default class BotDriver extends LocalDriver {
 		this.botState = new State();
 		this.botInputs = [];
 
-        this.wasmWorker = new Worker('./pub/js/botWorker.mjs', {type: "module"});
+        this.wasmWorker = new Worker(WORKER_PATH, {type: "module"});
 		this.wasmWorker.onmessage = e => {
 			console.log(`message from worker: `, e.data);
 			const msg = Array.isArray(e.data) ? e.data[0] : e.data;
