@@ -5,6 +5,7 @@ import { BotConfigs } from "./botWorker.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
+console.log(STATIC_VERSION);
 // Trigger load animations
 slideMenuIn(document.getElementById("home-menu"));
 
