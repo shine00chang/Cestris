@@ -1,4 +1,4 @@
-import init, { Input, Output, Piece } from '../wasm/tetron_wasm.js'
+import init, { Input, Output, Piece, Key } from '../wasm/tetron_wasm.js'
 
 
 export function BotConfigs (depth=2, pps=1.5) {
@@ -11,6 +11,7 @@ let loaded = false;
 let running = false;
 let configs = new BotConfigs();
 let bench_avg = 0;
+let bench_cnt = 0;
 
 // Booter
 async function run () {
@@ -71,43 +72,29 @@ const runBot = async (state) => {
 	const start = performance.now();
 	const output = input.run();
 	const elapsed = performance.now() - start;
-	bench_avg = (bench_avg + elapsed) / (bench_avg == 0 ? 1 : 2);
+	bench_avg = (bench_avg*bench_cnt + elapsed) / ++bench_cnt;
 	postMessage([`Bench avg: ${bench_avg}ms.  instance:${elapsed}ms`])
 
 	const keys = [];
 
 	{ // Parse output into array of keys
-		console.log({
-			x: output.x(),
-			r: output.r(),
-			hold: output.hold(),
-			s: output.s() 
-		});
-		const add = (k) => {
-			keys.push(k+"-down");
+        const add = k => {
+        	keys.push(k+"-down");
 			keys.push(k+"-up");
+        }
+
+        let key = output.next();
+	    while (key != Key.None) {	
+            if (key == Key.Left)        add("ArrowLeft"); 
+            if (key == Key.Right)       add("ArrowRight"); 
+            if (key == Key.Cw)          add("ArrowUp"); 
+            if (key == Key.Ccw)         add("z"); 
+            if (key == Key._180)        add("a"); 
+            if (key == Key.HardDrop)    add(" "); 
+            if (key == Key.SoftDrop)    add("ArrowDown"); 
+            if (key == Key.Hold)        add("c"); 
+            key = output.next();
 		}
-		if (output.hold()) add("c");
-
-		let r = output.s() == -1 ? output.r() : output.s();
-		if (r == 1) { add("ArrowUp"); }
-		if (r == 2) { add("z"); add("z"); }
-		if (r == 3) { add("z"); }
-
-		console.log(output.x());
-		let d = output.x() - 4;
-		if (d > 0) for (let i=0; i< d; i++) add("ArrowRight");
-		if (d < 0) for (let i=0; i<-d; i++) add("ArrowLeft");
-
-		// If spun
-		if (output.s() != -1) {
-			add("ArrowDown"); // Softdrop
-			let d = output.r() - output.s();
-			if (d ==  1) add("ArrowUp"); 
-			if (d == -1) add("z"); 
-			if (Math.abs(d) == 2) add("a"); 
-		}
-		add(" ");
 	}
 
 	running = false;

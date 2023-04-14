@@ -15,7 +15,7 @@ let username;
 let roomId;
 let admin = false;
 const config = {
-    DAS: 7,
+    DAS: 9,
     ARR: 0,
     SDF: 1000,
 };

@@ -50,6 +50,9 @@ function takeObject(idx) {
 export const Piece = Object.freeze({ J:1,"1":"J",L:2,"2":"L",S:3,"3":"S",Z:4,"4":"Z",T:5,"5":"T",I:6,"6":"I",O:7,"7":"O",Some:8,"8":"Some",None:0,"0":"None", });
 /**
 */
+export const Key = Object.freeze({ None:0,"0":"None",Left:1,"1":"Left",Right:2,"2":"Right",Cw:3,"3":"Cw",Ccw:4,"4":"Ccw",_180:5,"5":"_180",HardDrop:6,"6":"HardDrop",SoftDrop:7,"7":"SoftDrop",Hold:8,"8":"Hold", });
+/**
+*/
 export class Input {
 
     static __wrap(ptr) {
@@ -144,37 +147,9 @@ export class Output {
     /**
     * @returns {number}
     */
-    x() {
-        const ret = wasm.output_x(this.ptr);
-        return ret;
-    }
-    /**
-    * @returns {number}
-    */
-    y() {
-        const ret = wasm.output_y(this.ptr);
-        return ret;
-    }
-    /**
-    * @returns {number}
-    */
-    r() {
-        const ret = wasm.output_r(this.ptr);
-        return ret;
-    }
-    /**
-    * @returns {number}
-    */
-    s() {
-        const ret = wasm.output_s(this.ptr);
-        return ret;
-    }
-    /**
-    * @returns {boolean}
-    */
-    hold() {
-        const ret = wasm.output_hold(this.ptr);
-        return ret !== 0;
+    next() {
+        const ret = wasm.output_next(this.ptr);
+        return ret >>> 0;
     }
 }
 
@@ -258,7 +233,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('tetron_wasm_bg.wasm', import.meta.url);
+        input = new URL('tetron_wasm_bg_opt.wasm', import.meta.url);
     }
     const imports = getImports();
 
