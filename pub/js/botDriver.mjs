@@ -25,6 +25,7 @@ export default class BotDriver extends LocalDriver {
 		this.botInputs = [];
 
 		this.wasmWorker = new Worker('./js/botWorker.mjs', {type: "module"});
+		this.wasmWorker.running = false;
 		this.wasmWorker.postMessage(['config', botConfigs]);
 	}
 
@@ -53,7 +54,7 @@ export default class BotDriver extends LocalDriver {
 			console.log(`message from worker: `, e.data);
 			const msg = Array.isArray(e.data) ? e.data[0] : e.data;
 			if (msg == "done") {
-				this.botLastMove = Date.now();
+				this.wasmWorker.running = false;	
 				this.botInputs.push(...e.data[1]);
 			}
 		}
@@ -103,7 +104,10 @@ export default class BotDriver extends LocalDriver {
         this.state.attack = 0;
         this.botState.attack = 0;
 
-		if (Date.now() - this.botLastMove > this.botInterval) {
+		// If past bot delay AND No queued inputs.
+		if (this.wasmWorker.running == false &&
+			Date.now() - this.botLastMove > this.botInterval) {
+			this.wasmWorker.running = true;
 			this.botLastMove = Date.now();
 			this.wasmWorker.postMessage(["run", this.botState]);
 		}

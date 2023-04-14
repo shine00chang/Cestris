@@ -316,7 +316,7 @@ export default class Game {
                 case "ArrowDown":
 					// If first Softdrop-down input, add tick & process
 					if (inputs.includes("ArrowDown-down") && inputs.includes("ArrowDown-up")) 
-						console.log("bot softdrop");
+						console.log("bot softdrop", state.piece.r);
 					if (type === 'down' && state.softDropping === false) {
 						this.#softDrop();
 						this.#checkTicks();				

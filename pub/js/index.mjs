@@ -138,21 +138,6 @@ const onBot = () => {
 	// Create game object
 	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, new BotConfigs());
 
-	// Start global-level control (restart button)
-    document.getElementById("main-view").addEventListener("keyup", (e) => {
-        // Key 'r' => Restart game.
-        if (e.key == "r") {
-            game.destruct();
-            setTimeout(() => {
-                game = new LocalDriver(
-                    document.getElementById("main-view"),
-                    config
-                );
-                game.start();
-            }, 200);
-        }
-    });
-
 	// Start
 	game.start();
 }

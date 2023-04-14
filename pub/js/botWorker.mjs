@@ -1,7 +1,7 @@
 import init, { Input, Output, Piece } from '../wasm/tetron_wasm.js'
 
 
-export function BotConfigs (depth=3, pps=3) {
+export function BotConfigs (depth=2, pps=1.5) {
 	this.depth = depth;
 	this.delay = 1 / pps;
 }
@@ -10,6 +10,7 @@ let wasm, memory;
 let loaded = false;
 let running = false;
 let configs = new BotConfigs();
+let bench_avg = 0;
 
 // Booter
 async function run () {
@@ -48,7 +49,7 @@ const runBot = async (state) => {
 	const input = Input.new();
 
 	{ // Write configs
-		input.set_depth(configs.dpeth);
+		input.set_depth(configs.depth);
 	}
 
 	{ // Parse CESTRIS.State into TETRON-WASM.Input
@@ -67,9 +68,11 @@ const runBot = async (state) => {
 		input.set_hold(to_wasm_piece(state.hold));
 	}
 
-	const start = new Date();
+	const start = performance.now();
 	const output = input.run();
-	postMessage([`input.run() bench (ms): ${(new Date()) - start}`]);
+	const elapsed = performance.now() - start;
+	bench_avg = (bench_avg + elapsed) / (bench_avg == 0 ? 1 : 2);
+	postMessage([`Bench avg: ${bench_avg}ms.  instance:${elapsed}ms`])
 
 	const keys = [];
 
