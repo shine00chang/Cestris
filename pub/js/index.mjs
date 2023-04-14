@@ -1,15 +1,18 @@
 import LocalDriver from "./localDriver.mjs";
 import OnlineDriver from "./onlineDriver.mjs";
-import BotDriver from "./botDriver.mjs";
-import { BotConfigs } from "./botWorker.mjs";
+import BotDriver, { BotConfigs } from "./botDriver.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
-console.log(STATIC_VERSION);
+console.log("Is static page? ", IS_STATIC_PAGE ? true : false);
 // Trigger load animations
 slideMenuIn(document.getElementById("home-menu"));
 
-let socket = io();
+let socket;
+const connect = () => {
+    if (!IS_STATIC_PAGE) socket = io();
+}
+connect();
 let game;
 let chat;
 let username;
@@ -329,7 +332,6 @@ function onOnlineUnready() {
 }
 
 // ======== SETTING CALLBACKS ======= 
-
 // Home menu
 document.getElementById("title-box").onclick = onHome; 
 document.getElementById("config-button").onclick = onConfig;
@@ -341,7 +343,6 @@ document.getElementById("bot-button").onclick = onBot;
 document.getElementById("online-prompt-cancel").onclick = () =>
     decativatePrompt(document.getElementById("online-prompt"));
 document.getElementById("online-prompt-submit").onclick = onlinePromptSubmit;
-
 // Config prompt
 document.getElementById("config-prompt-cancel").onclick = () =>
     decativatePrompt(document.getElementById("config-prompt"));

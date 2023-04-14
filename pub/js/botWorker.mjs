@@ -1,20 +1,18 @@
 import init, { Input, Output, Piece, Key } from '../wasm/tetron_wasm.js'
 
-
-export function BotConfigs (depth=2, pps=1.5) {
-	this.depth = depth;
-	this.delay = 1 / pps;
-}
-
 let wasm, memory;
 let loaded = false;
 let running = false;
-let configs = new BotConfigs();
+let configs = undefined;
 let bench_avg = 0;
 let bench_cnt = 0;
 
+postMessage("asdklfja");
+
 // Booter
 async function run () {
+    console.log("hi");
+    postMessage(["hi"]);
 	wasm = await init();
 	memory = wasm.memory;
 	loaded = true;
@@ -102,6 +100,7 @@ const runBot = async (state) => {
 }
 
 onmessage = e => {
+    console.log(e.data);
 	const cmd = e.data[0];
 	switch (cmd) {
 	case "config":
@@ -122,6 +121,6 @@ onmessage = e => {
 		runBot(state);
 		break;
 	default:
-		postMessage(["unknown command: ", cmd]);
+		postMessage(["hi mom", cmd]);
 	}
 }

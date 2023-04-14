@@ -1,2 +1,10 @@
-node_modules
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
 .DS_Store
+yarn.lock
+Gemfile.lock
+Gemfile
+node_modules
+vendor

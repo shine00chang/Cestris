@@ -2,9 +2,14 @@ import Game from "./game.mjs";
 import LocalDriver from "./localDriver.mjs";
 import { State } from "./state.mjs";
 import Renderer from "./renderer.mjs";
-import { BotConfigs } from "./botWorker.mjs";
-
+//import { BotConfigs } from "./botWorker.mjs";
 import { FRAME_RATE } from "./config.mjs";
+
+
+export function BotConfigs (depth=2, pps=1.5) {
+	this.depth = depth;
+	this.delay = 1 / pps;
+}
 
 
 export default class BotDriver extends LocalDriver {
@@ -24,8 +29,19 @@ export default class BotDriver extends LocalDriver {
 		this.botState = new State();
 		this.botInputs = [];
 
-		this.wasmWorker = new Worker('./js/botWorker.mjs', {type: "module"});
-		this.wasmWorker.running = false;
+        this.wasmWorker = new Worker('./pub/js/botWorker.mjs', {type: "module"});
+		this.wasmWorker.onmessage = e => {
+			console.log(`message from worker: `, e.data);
+			const msg = Array.isArray(e.data) ? e.data[0] : e.data;
+			if (msg == "done") {
+				this.wasmWorker.running = false;	
+				this.botInputs.push(...e.data[1]);
+			}
+		}
+		this.wasmWorker.onerror = e => {
+			console.log(`error from worker: ${e}`);
+		}		
+        this.wasmWorker.running = false;
 		this.wasmWorker.postMessage(['config', botConfigs]);
 	}
 
@@ -49,18 +65,7 @@ export default class BotDriver extends LocalDriver {
 		// Draw Once (so as to not be empty)
 		this.botRenderer.renderFrom(this.botState);
 
-		// Worker Callbacks
-		this.wasmWorker.onmessage = e => {
-			console.log(`message from worker: `, e.data);
-			const msg = Array.isArray(e.data) ? e.data[0] : e.data;
-			if (msg == "done") {
-				this.wasmWorker.running = false;	
-				this.botInputs.push(...e.data[1]);
-			}
-		}
-		this.wasmWorker.onerror = e => {
-			console.log(`error from worker: ${e}`);
-		}
+
 
         // Lambda to run at the end of countdown
         const onStart = () => {
@@ -90,7 +95,6 @@ export default class BotDriver extends LocalDriver {
 
 	onFrame = () => {
 		if (this.inputs.includes("q-down")) return;
-		if (this.inputs.length > 0) console.log(this.inputs);
 		Game.process(this.config, this.state, this.inputs);
 		Game.process(this.config, this.botState, this.botInputs);
         
