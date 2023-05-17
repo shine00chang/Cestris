@@ -1,31 +1,30 @@
 {
-    "name": "cestris",
-    "version": "1.0.0",
-    "description": "Simple Web T*tris page with minimal multiplayer capabilities.",
-    "main": "index.js",
-    "repository": "https://github.com/PaddingProductions/Cestris.git",
-    "author": "Shine Chang <shine00chang@gmail.com>",
-    "license": "MIT",
-    "private": false,
-    "dependencies": {
-        "ejs": "^3.1.8",
-        "express": "^4.18.2",
-        "lodash": "^4.17.21",
-        "socket.io": "^4.5.3"
-    },
-    "devDependencies": {
-        "nodemon": "^2.0.20",
-        "prettier": "^2.7.1"
-    },
-    "nodemonConfig": {
-
-    },
-    "prettier": {
-        "tabWidth": 4
-    },
-    "scripts": {
-        "dev": "nodemon index.js",
-        "start": "node index.js",
-        "prettier": "prettier --write ."
-    }
+	"name": "cestris",
+	"version": "1.0.0",
+	"description": "Simple Web T*tris page with minimal multiplayer capabilities.",
+	"main": "index.js",
+	"repository": "https://github.com/PaddingProductions/Cestris.git",
+	"author": "Shine Chang <shine00chang@gmail.com>",
+	"license": "MIT",
+	"private": false,
+	"dependencies": {
+		"ejs": "^3.1.8",
+		"express": "^4.18.2",
+		"lodash": "^4.17.21",
+		"socket.io": "^4.5.3"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.20",
+		"prettier": "^2.7.1"
+	},
+	"nodemonConfig": {},
+	"prettier": {
+		"tabWidth": 4,
+		"useTabs": true
+	},
+	"scripts": {
+		"dev": "nodemon index.js",
+		"start": "node index.js",
+		"prettier": "prettier --write ."
+	}
 }

@@ -14,10 +14,10 @@ li {
 }
 .title-box {
     position: absolute;
-    top: 30%;
-    left: 50%;
+    top: 30vh;
+    left: 50vw;
     transform: translate(-50%, -50%);
-    width: 200px;
+    width: 20vw;
     
     transition: 1s ease-in-out;
 }
@@ -62,9 +62,10 @@ li {
     height: 100%;
 }
 input {
-    border: none;
+    border: gray solid 3px;
     border-radius: 6px;
-    padding: 4px;
+    padding: 0.2rem;
+	margin: 0.2rem;
 }
 button {
     border: 0px;
@@ -74,14 +75,19 @@ button {
     border-radius: 8px; 
     transition: 0.3s;
 }
-.prompt-button {
-    width: 40%;
-    background: #fff;
-}
 button:hover {
     background: #6ad2cb;
     color: white;
 }
+.prompt-button {
+    width: 100px;
+    background: #fff;
+}
+.prompt-content {
+	padding: 1rem;
+    background: #fff;
+}
+
 #online-ready-button {
     background: #fff;
 }

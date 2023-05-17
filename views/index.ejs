@@ -8,25 +8,40 @@
         </script>
     </head>
     <body>
-        <div id="online-prompt" class="prompt" style="display: none; opacity: 0;">
-            <label for="roomid">Room ID: </label><br>
-            <input id="roomid-input" name="roomid"></input> <br>
-            <label for="name">Username: </label><br>
-            <input id="name-input" name="name"></input> <br><br>
-            <button id="online-prompt-cancel" class="prompt-button">Cancel</button>
-            <button id="online-prompt-submit" class="prompt-button">Ok</button>
-        </div>
-        <div id="config-prompt" class="prompt" style="display: none; opacity: 0;">
-            <label for="SDF">SDF: (Default 7)</label><br>
-            <input id="SDF-input" name="SDF" type="number"></input> <br>
-            <label for="DAS">DAS: (Default 10)</label><br>
-            <input id="DAS-input" name="DAS" type="number"></input> <br>
-            <label for="ARR">ARR: (Default 1)</label><br>
-            <input id="ARR-input" name="ARR" type="number"></input> <br><br>
-            <button id="config-prompt-cancel" class="prompt-button">Cancel</button>
-            <button id="config-prompt-save" class="prompt-button">Save</button>
-        </div>
+		<div id="storage" style="display: none"> 
+			<div id="online-prompt" class="prompt-content">
+				<label for="roomid">Room ID: </label><br>
+				<input id="roomid-input" name="roomid"></input> <br>
+				<label for="name">Username: </label><br>
+				<input id="name-input" name="name"></input>
+			</div>
 
+			<div id="config-prompt" class="prompt-content">
+				<label for="SDF">SDF </label>
+				<input id="SDF-input" name="SDF" type="number" placeholder="-1"></input> <br>
+				<label for="DAS">DAS </label>
+				<input id="DAS-input" name="DAS" type="number" placeholder="7"></input> <br>
+				<label for="ARR">ARR </label>
+				<input id="ARR-input" name="ARR" type="number" placeholder="0"></input>
+			</div>
+
+			<div id="bot-prompt" class="prompt-content">
+				<label for="Depth">Depth </label>
+				<input id="Depth-input" name="Depth" type="number" placeholder="3"></input> <br>
+				<label for="PPS">PPS </label>
+				<input id="PPS-input" name="PPS" type="number" placholder="1.5"></input>
+			</div>
+		</div>
+
+        <div id="prompt" class="prompt" style="display: none; opacity: 0;">
+			<div id="prompt-content"></div>
+
+			<br>
+			<div style="display:flex; flex-direction: row">
+			<button id="prompt-cancel" class="prompt-button">Cancel</button>
+            <button id="prompt-submit" class="prompt-button">Ok</button>
+			</div>
+		</div>
 
         <div id="filter"></div>
 
@@ -67,8 +82,6 @@
             <div id="remote-view"></div>
         </div>
         
-
-    
         <script type="module" src="./js/index.mjs"></script>
     </body>
 </html>

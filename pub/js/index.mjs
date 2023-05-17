@@ -38,8 +38,9 @@ function setError(err) {
 
 // Animations
 function titleToConerTransition() {
-    document.getElementById("title-box").style.top = "5%";
-    document.getElementById("title-box").style.left = "7%";
+	let box = document.getElementById("title-box");
+    box.style.top = `${20 + box.offsetHeight/2}`;
+    box.style.left = `${20 + box.offsetWidth/2}`;
 }
 
 function slideMenuIn(elem) {
@@ -61,29 +62,54 @@ function startGameView(online = false) {
     document.getElementById("main-box").style.top = "10%";
 }
 
-function activatePrompt(elem) {
-    elem.style.display = "inline";
-    elem.style.opacity = 1;
-    document.getElementById("filter").style.opacity = 0.5;
-}
+function activatePrompt(content, cb) {
+	let prompt = document.getElementById("prompt");
+	let content_box = document.getElementById("prompt-content");
+	let submit = document.getElementById("prompt-submit");
+	let cancel = document.getElementById("prompt-cancel");
+	let storage = document.getElementById("storage");
 
-function decativatePrompt(elem) {
-    setTimeout(() => (elem.style.display = "none"), 1000);
-    elem.style.opacity = 0;
-    document.getElementById("filter").style.opacity = 0;
+	prompt.style.display = "inline";
+	prompt.style.opacity = 1;
+
+	content_box.appendChild(content);
+
+
+	const deactivate = () => {
+		let list = content_box.children;
+		for (let i=0; i<list.length; i++) {
+			console.log(list[i]);
+			let node = content_box.removeChild( list[i] );
+			storage.appendChild( node );
+		}
+		prompt.style.opacity = 0;
+		setTimeout(() => prompt.style.display = "none", 1000);
+		document.getElementById("filter").style.opacity = 0;
+	}
+
+	cancel.onclick = deactivate;
+	submit.onclick = () => {
+		deactivate();
+		cb();
+	};
+
+    document.getElementById("filter").style.opacity = 0.5;
 }
 
 // Callbacks on UI events
 const onHome = () => {
-    document.getElementById("title-box").style.top = "30%";
-    document.getElementById("title-box").style.left = "50%";
+	const title = document.getElementById("title-box");
+    title.style.top = "30%";
+    title.style.left = "50%";
+
 	game.destruct();
+
 	document.getElementById("main-box").style.top = "100%";
 	slideMenuIn(document.getElementById("home-menu"));
 };
 
 const onConfig = () => {
-    activatePrompt(document.getElementById("config-prompt"));
+    activatePrompt(document.getElementById("config-prompt"), onConfigSave);
 };
 
 const onConfigSave = () => {
@@ -105,8 +131,6 @@ const onConfigSave = () => {
     config.SDF = SDF;
     config.DAS = DAS;
     config.ARR = ARR;
-
-    decativatePrompt(document.getElementById("config-prompt"));
 };
 
 const onLocal = () => {
@@ -154,7 +178,7 @@ const onOnlineJoin = () => {
     if (game !== undefined) return;
 
     // Activate user & room ID prompt.
-    activatePrompt(document.getElementById("online-prompt"));
+    activatePrompt(document.getElementById("online-prompt"), onlinePromptSubmit);
 };
 
 function onlinePromptSubmit() {
@@ -186,9 +210,6 @@ const onJoinRoom = (data) => {
     // switch menus (trigger transitions)
     slideMenuOut(document.getElementById("home-menu"));
     startGameView(true);
-
-    // deactivate prompt
-    decativatePrompt(document.getElementById("online-prompt"));
 
     // Start game & chat
     game = new OnlineDriver(
@@ -340,12 +361,3 @@ document.getElementById("config-button").onclick = onConfig;
 document.getElementById("local-button").onclick = onLocal;
 document.getElementById("online-join-button").onclick = onOnlineJoin;
 document.getElementById("bot-button").onclick = onBot;
-
-// Online-Join prompt
-document.getElementById("online-prompt-cancel").onclick = () =>
-    decativatePrompt(document.getElementById("online-prompt"));
-document.getElementById("online-prompt-submit").onclick = onlinePromptSubmit;
-// Config prompt
-document.getElementById("config-prompt-cancel").onclick = () =>
-    decativatePrompt(document.getElementById("config-prompt"));
-document.getElementById("config-prompt-save").onclick = onConfigSave;
