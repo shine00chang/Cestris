@@ -96,6 +96,7 @@ export default class Game {
             if (this.state.garbage[0] == 0) this.state.garbage.shift();
         }
         this.state.attack = rawAttack;
+		this.state.stats.attacks += rawAttack;
     }
 
     // Inserts rows of garbage.
@@ -181,7 +182,7 @@ export default class Game {
     // Adds drop tick to piece
     static #softDrop() {
         let p = this.state.piece;
-        p.tick += this.config.SDF;
+        p.tick += this.config.SDF == -1 ? 1000 : this.config.SDF;
     }
 
     // Find lowest possible position of piece
@@ -206,6 +207,9 @@ export default class Game {
             for (let x = 0; x < p.mapSize; x++)
                 if (Piece.map(p, x, y) == 1)
                     this.state.grid[(p.y + y) * 10 + p.x + x] = p.type;
+
+		// Update stats
+		this.state.stats.pieces ++;
     }
 
     // Gets new piece, update queue
@@ -285,6 +289,11 @@ export default class Game {
     }
 
     static process(config, state, _inputs, shouldSpawnGarbage = true) {
+		// Set start time if not yet set
+		if (state.startTime == undefined) 
+			state.startTime = Date.now();
+
+
 		let inputs = [..._inputs];
         this.state = state;
         this.config = config;

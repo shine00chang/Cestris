@@ -7,7 +7,6 @@ let configs = undefined;
 let bench_avg = 0;
 let bench_cnt = 0;
 
-postMessage("asdklfja");
 
 // Booter
 async function run () {

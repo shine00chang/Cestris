@@ -19,15 +19,21 @@ let username;
 let roomId;
 let admin = false;
 const config = {
-    DAS: 9,
+    DAS: 7,
     ARR: 0,
-    SDF: 1000,
+    SDF: -1,
 };
 
 
+let clear_error_cb = undefined;
 // Error dispaly
 function setError(err) {
     document.getElementById("error").innerText = err;
+	if (clear_error_cb != undefined) 
+		clearTimeout(clear_error_cb);	
+	clear_error_cb = setTimeout(() => {
+    	document.getElementById("error").innerText = "";
+	});
 }
 
 // Animations
@@ -86,18 +92,14 @@ const onConfigSave = () => {
     const ARR = document.getElementById("ARR-input").value;
 
     // Validate values.
-    if (SDF < 1 || SDF > 10) {
-        setError("Invalid SDF.");
-        return;
-    }
-    if (DAS < 1 || DAS > 20) {
-        setError("Invalid DAS.");
-        return;
-    }
-    if (ARR < 0 || ARR > 5) {
-        setError("Invalid ARR.");
-        return;
-    }
+    if (SDF != -1 && SDF < 1 || SDF > 100) 
+        return setError("Invalid SDF.");
+
+    if (DAS < 1 || DAS > 20) 
+        return setError("Invalid DAS.");
+
+    if (ARR < 0 || ARR > 5) 
+        return setError("Invalid ARR.");
 
     // Set config values.
     config.SDF = SDF;

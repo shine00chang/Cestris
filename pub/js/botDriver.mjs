@@ -5,7 +5,7 @@ import Renderer from "./renderer.mjs";
 import { FRAME_RATE } from "./config.mjs";
 
 const WORKER_PATH = IS_STATIC_PAGE ? './pub/js/botWorker.mjs' : './js/botWorker.mjs';
-export function BotConfigs (depth=2, pps=1.5) {
+export function BotConfigs (depth=3, pps=3) {
 	this.depth = depth;
 	this.delay = 1 / pps;
 }

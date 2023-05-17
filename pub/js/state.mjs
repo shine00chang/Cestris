@@ -76,6 +76,10 @@ export class State {
         state.garbageRandState = cyrb128(seed[1]);
     }
 
+	static getTime(state) {
+		return (Date.now() - state.startTime) / 1000;
+	}
+
     constructor() {
         this.grid = new Array(200);
 
@@ -99,6 +103,12 @@ export class State {
         this.ARRtick = 0;
         this.DASd = 0;
         this.softDropping = false;
+
+		this.startTime = undefined;
+		this.stats = {
+			attacks: 0,
+			pieces: 0,
+		};
 
         this.over = false;
     }
