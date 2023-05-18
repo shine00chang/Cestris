@@ -1,4 +1,4 @@
-import init, { Input, Output, Piece, Key } from '../wasm/tetron_wasm.js'
+import init, { Input, Output, Piece, Key } from '../wasm/tetron_wasm.js';
 
 let wasm, memory;
 let loaded = false;
@@ -10,8 +10,6 @@ let bench_cnt = 0;
 
 // Booter
 async function run () {
-    console.log("hi");
-    postMessage(["hi"]);
 	wasm = await init();
 	memory = wasm.memory;
 	loaded = true;

@@ -12,7 +12,7 @@ const port = 8000;
 const FRAME_RATE = 30;
 
 app.use(express.json());
-app.use(express.static("pub"));
+app.use("/pub", express.static("pub"));
 
 app.get("/", (_, res) => {
     res.sendFile("index.html", { root: path.join(__dirname) });
