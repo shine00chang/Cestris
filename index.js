@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 const _ = require("lodash");
 
 const app = express();
@@ -11,11 +12,10 @@ const port = 8000;
 const FRAME_RATE = 30;
 
 app.use(express.json());
-app.set("view engine", "ejs");
 app.use(express.static("pub"));
 
-app.get("/", (req, res) => {
-	res.render("index.ejs");
+app.get("/", (_, res) => {
+    res.sendFile("index.html", { root: path.join(__dirname) });
 });
 
 const characters =
