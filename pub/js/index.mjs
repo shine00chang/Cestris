@@ -24,7 +24,7 @@ let username;
 let roomId;
 let admin = false;
 const config = {
-    DAS: 7,
+    DAS: 8,
     ARR: 0,
     SDF: -1,
 };
@@ -166,12 +166,24 @@ const onLocal = () => {
 };
 
 const onBot = () => {
+    activatePrompt(document.getElementById("bot-prompt"), onBotPromptSubmit);
+}
+const onBotPromptSubmit = () => {
 	// Change to game view
 	startGameView();
 	slideMenuOut(document.getElementById("home-menu"));
 
+	const config = {
+		DAS: 10,
+		SDF: -1,
+		ARR: 0,
+	};
+    const depth = parseInt(document.getElementById("depth-input").value);
+    const pps 	= parseFloat(document.getElementById("PPS-input").value);
+	const botConfigs = new BotConfigs(depth, pps);
+
 	// Create game object
-	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, new BotConfigs());
+	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, botConfigs);
 
 	// Start
 	game.start();
