@@ -1,13 +1,13 @@
 {
-	"name": "tetron-wasm",
-	"collaborators": [
-		"Shine Chang"
-	],
-	"version": "0.1.0",
-	"files": [
-		"tetron_wasm_bg.wasm",
-		"tetron_wasm.js"
-	],
-	"module": "tetron_wasm.js",
-	"sideEffects": false
+  "name": "tetron-wasm",
+  "collaborators": [
+    "Shine Chang"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "tetron_wasm_bg.wasm",
+    "tetron_wasm.js"
+  ],
+  "module": "tetron_wasm.js",
+  "sideEffects": false
 }
