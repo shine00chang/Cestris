@@ -13,9 +13,17 @@ const FRAME_RATE = 30;
 
 app.use(express.json());
 app.use("/pub", express.static("pub"));
+app.use(function(req, res, next) {
+    res.header("Cross-Origin-Embedder-Policy", "credentialless");
+    res.header("Cross-Origin-Opener-Policy", "same-origin");
+    next();
+});
 
 app.get("/", (_, res) => {
-    res.sendFile("index.html", { root: path.join(__dirname) });
+    const opts = {
+        root: path.join(__dirname),
+    };
+    res.sendFile("index.html", opts);
 });
 
 const characters =

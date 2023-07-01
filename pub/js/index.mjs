@@ -4,7 +4,7 @@ import BotDriver, { BotConfigs } from "./botDriver.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
-var IS_STATIC_PAGE = true;//window.location.href.startsWith("https://paddingproductions.github.io/");
+var IS_STATIC_PAGE = window.location.href.startsWith("https://paddingproductions.github.io/");
 console.log("Is static page? ", IS_STATIC_PAGE ? true : false);
 if (IS_STATIC_PAGE) {
 	document.getElementById("online-join-button").disabled = true;

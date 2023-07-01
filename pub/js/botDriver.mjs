@@ -26,20 +26,27 @@ export default class BotDriver extends LocalDriver {
 		this.botState = new State();
 		this.botInputs = [];
 
-        this.wasmWorker = new Worker("./pub/js/botWorker.mjs", {type: "module"});
-		this.wasmWorker.onmessage = e => {
-			console.log(`message from worker: `, e.data);
-			const msg = Array.isArray(e.data) ? e.data[0] : e.data;
-			if (msg == "done") {
-				this.wasmWorker.running = false;	
-				this.botInputs.push(...e.data[1]);
-			}
-		}
-		this.wasmWorker.onerror = e => {
-			console.log(`error from worker: ${e}`);
-		}		
-        this.wasmWorker.running = false;
-		this.wasmWorker.postMessage(['config', botConfigs]);
+        fetch("./pub/js/botWorker.js")
+            .then(res => res.text())
+            .then(workerFile => {
+                console.log(workerFile);
+
+                let blob = new Blob([workerFile], {type: 'application/javascript'});
+                const worker = new Worker(URL.createObjectURL(blob));
+                worker.onmessage = e => {
+                    console.log(`message from worker: `, e.data);
+                    const msg = Array.isArray(e.data) ? e.data[0] : e.data;
+                    if (msg == "solution") {
+                        this.wasmWorker.running = false;	
+                        this.botInputs.push(...e.data[1]);
+                    }
+                }
+                worker.onerror = e => {
+                    console.log(`error from worker:`, e);
+                }		
+                worker.running = false;
+                this.wasmWorker = worker;
+            });
 	}
 
     destruct () {
@@ -110,7 +117,7 @@ export default class BotDriver extends LocalDriver {
 			Date.now() - this.botLastMove > this.botInterval) {
 			this.wasmWorker.running = true;
 			this.botLastMove = Date.now();
-			this.wasmWorker.postMessage(["run", this.botState]);
+			this.wasmWorker.postMessage(["run", this.botState, this.botInterval]);
 		}
     
 		this.inputs = [];
