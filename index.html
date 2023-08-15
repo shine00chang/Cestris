@@ -1,6 +1,10 @@
 <html>
     <head>
         <link href="pub/css/style.css" rel="stylesheet" type="text/css">
+        <link href="pub/loading-animation/style.css" rel="stylesheet" type="text/css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
     </head>
     <body>
 		<div id="storage" style="display: none"> 
@@ -28,11 +32,11 @@
 			</div>
 		</div>
 
-        <div id="prompt" class="prompt" style="display: none; opacity: 0;">
+        <div id="prompt" class="prompt" style="opacity: 0;">
 			<div id="prompt-content"></div>
 
 			<br>
-			<div style="display:flex; flex-direction: row">
+			<div style="display:flex">
 			<button id="prompt-cancel" class="prompt-button">Cancel</button>
             <button id="prompt-submit" class="prompt-button">Ok</button>
 			</div>
@@ -40,17 +44,26 @@
 
         <div id="filter"></div>
 
-        <div class="title-box" id="title-box"> 
-            <div class="title">Cestris</div>
-            <p id='error' style="color: red"></p>
-        </div>
+        <div id="banner" style="top: -30%"></div> 
+        <div id="home-box" style="left: -30%; opacity: 0;"> 
+            <div class="title-box" id="title-box"> 
+                <div class="title">Cestris</div>
+                <p id='error' style="color: red"></p>
+                <div class="container">
+                  <div id="t1" class="block"><div class="block-inner"></div></div>
+                  <div id="t2" class="block"><div class="block-inner"></div></div>
+                  <div id="t3" class="block"><div class="block-inner"></div></div>
+                  <div id="t4" class="block"><div class="block-inner"></div></div>
+                </div>
+            </div>
 
 
-        <div id="home-menu" class="menu-box"> 
-            <button id="online-join-button">Online-Join</button> <br>
-            <button id="local-button">Local</button> <br>
-            <button id="bot-button">Bot</button> <br>
-            <button id="config-button">Config</button> <br>
+            <div id="home-menu" class="menu-box"> 
+                <button id="online-join-button">Online-Join</button> <br>
+                <button id="local-button">Local</button> <br>
+                <button id="bot-button">Bot</button> <br>
+                <button id="config-button">Config</button> <br>
+            </div>
         </div>
 
 

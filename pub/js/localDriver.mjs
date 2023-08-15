@@ -16,8 +16,10 @@ export default class LocalDriver {
         this.keys = {};
         this.config = config;
 
-        this.renderer = new Renderer(parent);
+        this.parent = parent;
+        this.renderer = new Renderer(this.parent);
         this.renderer.box.tabIndex = "0";
+        this.renderer.box.focus();
     }
 
 	stop () {
@@ -28,8 +30,7 @@ export default class LocalDriver {
         // Stop loop
        	this.stop(); 
 
-        // Destroy HTML element
-        this.renderer.destruct();
+        this.parent.replaceChildren();
 
         // Stop listeners
         this.renderer.box.removeEventListener("keyup", this.handleKeyDown);
@@ -56,11 +57,10 @@ export default class LocalDriver {
             this.renderer.renderCountDown(this.state, countdown--);
 
             if (countdown < 0) {
-                this.renderer.box.focus();
                 onStart();
-                return;
+            } else {
+                setTimeout(onCountdown, 1000);
             }
-            setTimeout(onCountdown, 1000);
         };
         onCountdown();
     };

@@ -10,9 +10,6 @@ if (IS_STATIC_PAGE) {
 	document.getElementById("online-join-button").disabled = true;
 }
 
-// Trigger load animations
-slideMenuIn(document.getElementById("home-menu"));
-
 let socket;
 const connect = () => {
     if (!IS_STATIC_PAGE) socket = io();
@@ -30,91 +27,89 @@ const config = {
 };
 
 
+
 let clear_error_cb = undefined;
 // Error dispaly
 function setError(err) {
     document.getElementById("error").innerText = err;
-	if (clear_error_cb != undefined) 
+	if (clear_error_cb != undefined) {
 		clearTimeout(clear_error_cb);	
-	clear_error_cb = setTimeout(() => {
     	document.getElementById("error").innerText = "";
-	});
+	};
 }
 
-// Animations
-function titleToConerTransition() {
-	let box = document.getElementById("title-box");
-    box.style.top = `${20 + box.offsetHeight/2}`;
-    box.style.left = `${20 + box.offsetWidth/2}`;
-}
 
-function slideMenuIn(elem) {
-    elem.style.top = "40%";
-    elem.style.opacity = 1;
-}
 
-function slideMenuOut(elem) {
-    elem.style.top = "100%";
-    elem.style.opacity = 0;
-}
+function setPrompt(name, cb) {
+    const content = document.getElementById(name).cloneNode(true);
+	const prompt = document.getElementById("prompt");
+	const content_box = document.getElementById("prompt-content");
+	const submit = document.getElementById("prompt-submit");
+	const cancel = document.getElementById("prompt-cancel");
+    const filter = document.getElementById("filter");
 
-// Slides in Game view, moves title.
-function startGameView(online = false) {
-    titleToConerTransition();
+    // Checking
+    if (content === null) return;
 
-    if (online) document.getElementById("room-view").style.display = "inline";
-    document.getElementById("main-box").style.display = "flex";
-    document.getElementById("main-box").style.top = "10%";
-}
+    content_box.replaceChildren(content);
 
-function activatePrompt(content, cb) {
-	let prompt = document.getElementById("prompt");
-	let content_box = document.getElementById("prompt-content");
-	let submit = document.getElementById("prompt-submit");
-	let cancel = document.getElementById("prompt-cancel");
-	let storage = document.getElementById("storage");
-
-	prompt.style.display = "inline";
+    prompt.style.zIndex = 10;
 	prompt.style.opacity = 1;
+    filter.style.opacity = 0.5;
 
-	content_box.appendChild(content);
-
-
-	const deactivate = () => {
-		let list = content_box.children;
-		for (let i=0; i<list.length; i++) {
-			console.log(list[i]);
-			let node = content_box.removeChild( list[i] );
-			storage.appendChild( node );
-		}
+	const clear = () => {
+        prompt.style.zIndex = 0;
 		prompt.style.opacity = 0;
-		setTimeout(() => prompt.style.display = "none", 1000);
-		document.getElementById("filter").style.opacity = 0;
+		filter.style.opacity = 0;
 	}
 
-	cancel.onclick = deactivate;
-	submit.onclick = () => {
-		deactivate();
-		cb();
-	};
-
-    document.getElementById("filter").style.opacity = 0.5;
+	cancel.onclick = () => { clear() }
+	submit.onclick = () => { clear(); cb(); };
 }
 
-// Callbacks on UI events
-const onHome = () => {
-	const title = document.getElementById("title-box");
-    title.style.top = "30%";
-    title.style.left = "50%";
 
-	game.destruct();
+function setGameView(online = false) 
+{
+    // Corner title banner
+ 	const banner = document.getElementById('banner');
+    if (!banner.hasChildNodes()) {
+        banner.appendChild(document.getElementById('title-box').cloneNode(true));
+    }
+    banner.style.opacity = 1;
+    banner.style.top = '0px';
 
-	document.getElementById("main-box").style.top = "100%";
-	slideMenuIn(document.getElementById("home-menu"));
-};
+    // Slide home box out 
+    const homeBox = document.getElementById('home-box');
+    homeBox.style.left = '-50%';
+    homeBox.style.opacity = 0;
+
+    // Slide game view in
+    if (online) document.getElementById("room-view").style.display = "inline";
+    document.getElementById("main-box").style.top = "15%";
+}
+
+function setHomeView()
+{
+    // Corner title banner out
+ 	const banner = document.getElementById('banner');
+    if (!banner.hasChildNodes()) {
+        banner.appendChild(document.getElementById('title-box').cloneNode(true));
+    }
+    banner.style.opacity = 0;
+    banner.style.top = '-30%';
+
+    // Slide home box in 
+    const homeBox = document.getElementById('home-box');
+    homeBox.style.left = '50%';
+    homeBox.style.opacity = 1;
+
+    // Slide game view out 
+    document.getElementById("main-box").style.top = "100vh";
+}
+
 
 const onConfig = () => {
-    activatePrompt(document.getElementById("config-prompt"), onConfigSave);
+    setPrompt("config-prompt", onConfigSave);
 };
 
 const onConfigSave = () => {
@@ -139,39 +134,25 @@ const onConfigSave = () => {
 };
 
 const onLocal = () => {
-    // Change to game view.
-    startGameView();
-    slideMenuOut(document.getElementById("home-menu"));
-
-    // Create game object.
+    setGameView();
+    if (game != undefined) game.destruct();
     game = new LocalDriver(document.getElementById("main-view"), config);
-
-    // Start global-level control (key) listeners.
-    document.getElementById("main-view").addEventListener("keyup", (e) => {
-        // Key 'r' => Restart game.
-        if (e.key == "r") {
-            game.destruct();
-            setTimeout(() => {
-                game = new LocalDriver(
-                    document.getElementById("main-view"),
-                    config
-                );
-                game.start();
-            }, 200);
-        }
-    });
-
-    // Start game.
     game.start();
 };
 
+// Restart key handler
+document.getElementById("main-view").addEventListener("keyup", (e) => {
+    if (e.key !== "r") return;
+    game.destruct();
+    onLocal();
+});
+
 const onBot = () => {
-    activatePrompt(document.getElementById("bot-prompt"), onBotPromptSubmit);
+    setPrompt("bot-prompt", onBotPromptSubmit);
 }
 const onBotPromptSubmit = () => {
 	// Change to game view
-	startGameView();
-	slideMenuOut(document.getElementById("home-menu"));
+	setGameView();
 
 	const config = {
 		DAS: 10,
@@ -195,7 +176,7 @@ const onOnlineJoin = () => {
     if (game !== undefined) return;
 
     // Activate user & room ID prompt.
-    activatePrompt(document.getElementById("online-prompt"), onlinePromptSubmit);
+    setPrompt("online-prompt", onlinePromptSubmit);
 };
 
 function onlinePromptSubmit() {
@@ -223,10 +204,7 @@ function onlinePromptSubmit() {
 }
 
 const onJoinRoom = (data) => {
-    // On sucess
-    // switch menus (trigger transitions)
-    slideMenuOut(document.getElementById("home-menu"));
-    startGameView(true);
+    setGameView(true);
 
     // Start game & chat
     game = new OnlineDriver(
@@ -373,8 +351,12 @@ function onOnlineUnready() {
 
 // ======== SETTING CALLBACKS ======= 
 // Home menu
-document.getElementById("title-box").onclick = onHome; 
+document.getElementById("banner").onclick = setHomeView; 
 document.getElementById("config-button").onclick = onConfig;
 document.getElementById("local-button").onclick = onLocal;
 document.getElementById("online-join-button").onclick = onOnlineJoin;
 document.getElementById("bot-button").onclick = onBot;
+
+// Slide menu In
+document.getElementById('home-box').style.left = '50%';
+document.getElementById('home-box').style.opacity = 1;

@@ -5,6 +5,6 @@ _site
 .DS_Store
 yarn.lock
 Gemfile.lock
-Gemfile
 node_modules
-vendor
+Gemfile
+fetch-driver.sh

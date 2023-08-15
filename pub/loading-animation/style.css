@@ -1,0 +1,171 @@
+:root {
+  --size: 20px;
+  --margin: 1px;
+  --shrinkR: 1.4;
+}
+
+.container {
+  position: relative;
+  height: calc( var(--size) * 4 );
+  width:  calc( var(--size) * 4 );
+}
+
+.block {
+  position: absolute; 
+  top:  0px;
+  left: 0px;
+  width:  calc( var(--size) - 2*var(--margin) );
+  height: calc( var(--size) - 2*var(--margin) );
+  background-color: #ccc;
+  margin: var(--margin);
+  animation: 1.5s infinite shrink, 10.5s infinite move;
+}
+
+.block-inner {
+  width:  60%;
+  height: 60%;
+  margin: 20%;
+  background-color: #eee;
+  opacity: 0.2;
+}
+
+
+@keyframes shrink {
+  from { 
+    width:  calc( var(--size) - 2*var(--margin) );
+    height: calc( var(--size) - 2*var(--margin) );
+    margin: var(--margin);
+  }
+  50% {
+    width:  calc( var(--size) - var(--shrinkR)*2*var(--margin) );
+    height: calc( var(--size) - var(--shrinkR)*2*var(--margin) );
+    margin: calc( var(--shrinkR)*var(--margin));
+  }
+  to {
+    width:  calc( var(--size) - 2*var(--margin) );
+    height: calc( var(--size) - 2*var(--margin) );
+    margin: var(--margin);
+  }
+}
+
+@keyframes move {
+  0% { 
+    left: calc( var(--0x) * var(--size) );
+    top:  calc( var(--0y) * var(--size) );
+    background-color: var(--0c);
+  }
+  14.286% { 
+    left: calc( var(--1x) * var(--size) );
+    top:  calc( var(--1y) * var(--size) );
+    background-color: var(--1c);
+  }
+  28.571% { 
+    left: calc( var(--2x) * var(--size) );
+    top:  calc( var(--2y) * var(--size) );
+    background-color: var(--2c);
+  }
+  42.857% { 
+    left: calc( var(--3x) * var(--size) );
+    top:  calc( var(--3y) * var(--size) );
+    background-color: var(--3c);
+  }
+  57.143% {
+    left: calc( var(--4x) * var(--size) );
+    top:  calc( var(--4y) * var(--size) );
+    background-color: var(--4c);
+  }
+  71.429% {
+    left: calc( var(--5x) * var(--size) );
+    top:  calc( var(--5y) * var(--size) );
+    background-color: var(--5c);
+  }
+  85.714% {
+    left: calc( var(--6x) * var(--size) );
+    top:  calc( var(--6y) * var(--size) );
+    background-color: var(--6c);
+  }
+  100% {
+    left: calc( var(--0x) * var(--size) );
+    top:  calc( var(--0y) * var(--size) );
+    background-color: var(--0c);
+  }
+}
+
+.block { 
+  --0c: #74bd55;
+  --1c: #559ebd;
+  --2c: #db3737;
+  --3c: #f0cb16;
+  --4c: #e8921a;
+  --5c: #8e21c4;
+  --6c: #215ac4;
+}
+#t1 {
+  --0x: 0;
+  --0y: 2;
+  --1x: 1;
+  --1y: 3;
+  --2x: 1;
+  --2y: 2;
+  --3x: 1;
+  --3y: 2;
+  --4x: 0;
+  --4y: 2;
+  --5x: 0;
+  --5y: 2;
+  --6x: 0;
+  --6y: 1;
+}
+
+#t2 {
+  --0x: 1;
+  --0y: 2;
+  --1x: 1;
+  --1y: 2;
+  --2x: 2;
+  --2y: 2;
+  --3x: 2;
+  --3y: 2;
+  --4x: 1;
+  --4y: 2;
+  --5x: 1;
+  --5y: 2;
+  --6x: 0;
+  --6y: 2;
+}
+
+#t3 {
+  --0x: 1;
+  --0y: 1;
+  --1x: 1;
+  --1y: 1;
+  --2x: 1;
+  --2y: 1;
+  --3x: 2;
+  --3y: 1;
+  --4x: 2;
+  --4y: 1;
+  --5x: 1;
+  --5y: 1;
+  --6x: 1;
+  --6y: 2;
+}
+
+#t4 {
+  --0x: 2;
+  --0y: 1;
+  --1x: 1;
+  --1y: 0;
+  --2x: 0;
+  --2y: 1;
+  --3x: 1;
+  --3y: 1;
+  --4x: 2;
+  --4y: 2;
+  --5x: 2;
+  --5y: 2;
+  --6x: 2;
+  --6y: 2;
+}
+
+

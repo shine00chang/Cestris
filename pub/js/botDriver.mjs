@@ -19,14 +19,22 @@ export default class BotDriver extends LocalDriver {
 
 		super(parent, config);
 
-		this.botRenderer = new Renderer(botParent);
+        this.botParent = botParent;
+		this.botRenderer = new Renderer(this.botParent);
 
 		this.botLastMove = new Date(0);
 		this.botInterval = botConfigs.delay * 1000;
 		this.botState = new State();
 		this.botInputs = [];
 
-        fetch("./pub/js/botWorker.js")
+        fetch("./pub/js/botWorker.js",
+            {
+                method: "GET",
+                headers: {
+                    "Cross-Origin-Embedder-Policy": "credentialless",
+                    "Cross-Origin-Opener-Policy": "same-origin"
+                }
+            })
             .then(res => res.text())
             .then(workerFile => {
                 console.log(workerFile);
@@ -51,8 +59,7 @@ export default class BotDriver extends LocalDriver {
 
     destruct () {
 		super.destruct();
-
-		this.botRenderer.destruct();
+        this.botParent.replaceChildren();
 		this.wasmWorker.terminate();
     };
 
