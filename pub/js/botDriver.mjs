@@ -22,11 +22,13 @@ export default class BotDriver extends LocalDriver {
         this.botParent = botParent;
 		this.botRenderer = new Renderer(this.botParent);
 
-		this.botLastMove = new Date(0);
+		this.botLastMoveStart = new Date(0);
 		this.botInterval = botConfigs.delay * 1000;
 		this.botState = new State();
 		this.botInputs = [];
 
+        // Spawn worker
+        // Fetch file
         fetch("./pub/js/botWorker.js",
             {
                 method: "GET",
@@ -39,28 +41,30 @@ export default class BotDriver extends LocalDriver {
             .then(workerFile => {
                 console.log(workerFile);
 
+                // Create blob
                 let blob = new Blob([workerFile], {type: 'application/javascript'});
-                const worker = new Worker(URL.createObjectURL(blob));
-                worker.onmessage = e => {
+                this.worker = new Worker(URL.createObjectURL(blob));
+                this.worker.running = false;
+
+                // Worker Callbacks
+                this.worker.onmessage = e => {
                     console.log(`message from worker: `, e.data);
                     const msg = Array.isArray(e.data) ? e.data[0] : e.data;
+
                     if (msg == "solution") {
-                        this.wasmWorker.running = false;	
                         this.botInputs.push(...e.data[1]);
                     }
                 }
-                worker.onerror = e => {
+                this.worker.onerror = e => {
                     console.log(`error from worker:`, e);
                 }		
-                worker.running = false;
-                this.wasmWorker = worker;
             });
 	}
 
     destruct () {
 		super.destruct();
         this.botParent.replaceChildren();
-		this.wasmWorker.terminate();
+		this.worker.terminate();
     };
 
 	start () {
@@ -76,8 +80,6 @@ export default class BotDriver extends LocalDriver {
 		// Draw Once (so as to not be empty)
 		this.botRenderer.renderFrom(this.botState);
 
-
-
         // Lambda to run at the end of countdown
         const onStart = () => {
             Game.start(this.state);
@@ -87,6 +89,9 @@ export default class BotDriver extends LocalDriver {
             this.renderer.box.addEventListener("keydown", this.handleKeyDown);
             this.renderer.box.addEventListener("keyup", this.handleKeyUp);
             this.onFrame();
+
+            // First move
+            this.worker.postMessage(["run", this.botState, this.botInterval]);
         };
 
         // Start countdown, set to T-3.
@@ -107,7 +112,17 @@ export default class BotDriver extends LocalDriver {
 	onFrame = () => {
 		if (this.inputs.includes("q-down")) return;
 		Game.process(this.config, this.state, this.inputs);
-		Game.process(this.config, this.botState, this.botInputs);
+
+        // If past interval and has move, update state.
+        let botMoved = false;
+        if (this.botInputs.length > 0 &&
+            Date.now() - this.botLastMoveStart > this.botInterval) 
+        {
+            Game.process(this.config, this.botState, this.botInputs);
+			this.botLastMoveStart = Date.now();
+            this.botInputs = [];
+            botMoved = true;
+        }
         
 		this.renderer.renderFrom(this.state);
 		this.botRenderer.renderFrom(this.botState);
@@ -119,16 +134,12 @@ export default class BotDriver extends LocalDriver {
         this.state.attack = 0;
         this.botState.attack = 0;
 
-		// If past bot delay AND No queued inputs.
-		if (this.wasmWorker.running == false &&
-			Date.now() - this.botLastMove > this.botInterval) {
-			this.wasmWorker.running = true;
-			this.botLastMove = Date.now();
-			this.wasmWorker.postMessage(["run", this.botState, this.botInterval]);
-		}
-    
+        // If bot moved, start next move
+        if (botMoved) {
+            this.worker.postMessage(["run", this.botState, this.botInterval]);
+        }
+
 		this.inputs = [];
-        this.botInputs = [];
         this.frameIndex++;
 
         if (!this.over && !this.state.over && !this.botState.over) {

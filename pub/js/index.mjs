@@ -4,15 +4,18 @@ import BotDriver, { BotConfigs } from "./botDriver.mjs";
 import Chat from "./chat.mjs";
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
-var IS_STATIC_PAGE = window.location.href.startsWith("https://paddingproductions.github.io/");
-console.log("Is static page? ", IS_STATIC_PAGE ? true : false);
-if (IS_STATIC_PAGE) {
+var IS_GITHUB_PAGES = window.location.href.search("github.io") == -1;
+var MULTIPLAYER = !IS_GITHUB_PAGES && false;
+console.log("Is githubpages page? ", IS_GITHUB_PAGES);
+console.log("Multiplayer enabled? ", MULTIPLAYER);
+
+if (!MULTIPLAYER) {
 	document.getElementById("online-join-button").disabled = true;
 }
 
 let socket;
 const connect = () => {
-    if (!IS_STATIC_PAGE) socket = io();
+    if (MULTIPLAYER) socket = io();
 }
 connect();
 let game;
