@@ -162,9 +162,8 @@ const onBotPromptSubmit = () => {
 		SDF: -1,
 		ARR: 0,
 	};
-    const depth = Math.min(3, 	Math.max(1, 	parseInt(document.getElementById("depth-input").value)));
     const pps 	= Math.min(10, 	Math.max(0.5, 	parseFloat(document.getElementById("PPS-input").value)));
-	const botConfigs = new BotConfigs(depth, pps);
+	const botConfigs = new BotConfigs(pps);
 
 	// Create game object
 	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, botConfigs);
