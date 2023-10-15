@@ -3,9 +3,8 @@ layout: default
 ---
 
 # Cestris
-A web port of modern Tetris.
+A web port of modern guideline Tetris
 
-Uses `Tetron` as tetris bot in bot games. Check out the project [here](https://paddingproductions.github.io/Tetron)
+Try it out [here](https://shine00chang.github.io/Cestris)
 
-Hosted on github pages, try out [here](https://paddingproductions.github.io/Cestris/index.html)
-
+Uses [Quaternion]() as bot
