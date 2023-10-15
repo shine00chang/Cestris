@@ -1,7 +1,3 @@
----
-layout: default 
----
-
 # Cestris
 A web port of modern guideline Tetris
 
