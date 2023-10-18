@@ -10,7 +10,7 @@ console.log("Is githubpages page? ", IS_GITHUB_PAGES);
 console.log("Multiplayer enabled? ", MULTIPLAYER);
 
 if (!MULTIPLAYER) {
-	document.getElementById("online-join-button").disabled = true;
+	queryElement("#online-join-button").disabled = true;
 }
 
 let socket;
@@ -30,14 +30,26 @@ const config = {
 };
 
 
+function queryElement (query) {
+    const storage_elem = document.getElementById("storage");
+    let elems = document.querySelectorAll(query);
+
+    for (const elem of elems) {
+        if (!storage_elem.contains(elem)) {
+            return elem;
+        }
+    }
+
+    return undefined;
+}
 
 let clear_error_cb = undefined;
 // Error dispaly
 function setError(err) {
-    document.getElementById("error").innerText = err;
+    queryElement("#error").innerText = err;
 	if (clear_error_cb != undefined) {
 		clearTimeout(clear_error_cb);	
-    	document.getElementById("error").innerText = "";
+    	queryElement("#error").innerText = "";
 	};
 }
 
@@ -45,11 +57,11 @@ function setError(err) {
 
 function setPrompt(name, cb) {
     const content = document.getElementById(name).cloneNode(true);
-	const prompt = document.getElementById("prompt");
-	const content_box = document.getElementById("prompt-content");
-	const submit = document.getElementById("prompt-submit");
-	const cancel = document.getElementById("prompt-cancel");
-    const filter = document.getElementById("filter");
+	const prompt = queryElement("#prompt");
+	const content_box = queryElement("#prompt-content");
+	const submit = queryElement("#prompt-submit");
+	const cancel = queryElement("#prompt-cancel");
+    const filter = queryElement("#filter");
 
     // Checking
     if (content === null) return;
@@ -87,8 +99,8 @@ function setGameView(online = false)
     homeBox.style.opacity = 0;
 
     // Slide game view in
-    if (online) document.getElementById("room-view").style.display = "inline";
-    document.getElementById("main-box").style.top = "15%";
+    if (online) queryElement("#room-view").style.display = "inline";
+    queryElement("#main-box").style.top = "15%";
 }
 
 function setHomeView()
@@ -106,8 +118,14 @@ function setHomeView()
     homeBox.style.left = '50%';
     homeBox.style.opacity = 1;
 
-    // Slide game view out 
-    document.getElementById("main-box").style.top = "100vh";
+    // Slide main box out 
+    queryElement("#main-box").style.top = "130vh";
+
+    // Remove main view
+    setTimeout(() => {
+        queryElement("#main-view").innerHTML = "";
+        if (game != undefined) game.destruct();
+    }, 500);
 }
 
 
@@ -116,9 +134,9 @@ const onConfig = () => {
 };
 
 const onConfigSave = () => {
-    const SDF = document.getElementById("SDF-input").value;
-    const DAS = document.getElementById("DAS-input").value;
-    const ARR = document.getElementById("ARR-input").value;
+    const SDF = queryElement("#SDF-input").value;
+    const DAS = queryElement("#DAS-input").value;
+    const ARR = queryElement("#ARR-input").value;
 
     // Validate values.
     if (SDF != -1 && SDF < 1 || SDF > 100) 
@@ -139,12 +157,12 @@ const onConfigSave = () => {
 const onLocal = () => {
     setGameView();
     if (game != undefined) game.destruct();
-    game = new LocalDriver(document.getElementById("main-view"), config);
+    game = new LocalDriver(queryElement("#main-view"), config);
     game.start();
 };
 
 // Restart key handler
-document.getElementById("main-view").addEventListener("keyup", (e) => {
+queryElement("#main-view").addEventListener("keyup", (e) => {
     if (e.key !== "r") return;
     game.destruct();
     onLocal();
@@ -162,11 +180,12 @@ const onBotPromptSubmit = () => {
 		SDF: -1,
 		ARR: 0,
 	};
-    const pps 	= Math.min(10, 	Math.max(0.5, 	parseFloat(document.getElementById("PPS-input").value)));
+
+    const pps 	= Math.min(10, 	Math.max(0.5, 	parseFloat(queryElement("#PPS-input").value)));
 	const botConfigs = new BotConfigs(pps);
 
 	// Create game object
-	game = new BotDriver(document.getElementById("main-view"), document.getElementById("remote-view"), config, botConfigs);
+	game = new BotDriver(queryElement("#main-view"), document.getElementById("remote-view"), config, botConfigs);
 
 	// Start
 	game.start();
@@ -183,8 +202,8 @@ const onOnlineJoin = () => {
 
 function onlinePromptSubmit() {
     // Send 'online-join' event to signal join
-    const roomIdIn = document.getElementById("roomid-input").value;
-    const nameIn = document.getElementById("name-input").value.trim();
+    const roomIdIn = queryElement("#roomid-input").value;
+    const nameIn = queryElement("#name-input").value.trim();
 
     // Check if valid name
     if (nameIn.length < 3) {
@@ -210,19 +229,19 @@ const onJoinRoom = (data) => {
 
     // Start game & chat
     game = new OnlineDriver(
-        document.getElementById("main-view"),
-        document.getElementById("remote-view"),
+        queryElement("#main-view"),
+        queryElement("#remote-view"),
         socket,
         config
     );
-    chat = new Chat(socket, document.getElementById("chat-box"));
+    chat = new Chat(socket, queryElement("#chat-box"));
 
     // Store name, roomId, & admin state
     roomId = data.roomId;
     username = data.name;
     if (data.admin == username) admin = true;
-    document.getElementById("roomId").innerText = `Room ID: ${roomId}`;
-    document.getElementById("username").innerText = `Username: ${name}`;
+    queryElement("#roomId").innerText = `Room ID: ${roomId}`;
+    queryElement("#username").innerText = `Username: ${name}`;
 
     // Creates a member-element given the name.
     const addMember = (name) => {
@@ -243,7 +262,7 @@ const onJoinRoom = (data) => {
             socket.emit("online-admin-set-active", { name: name });
         entry.appendChild(activateBtn);
 
-        document.getElementById("member-list").appendChild(entry);
+        queryElement("#member-list").appendChild(entry);
     };
     // Sets member-list given the active players;
     const setActive = (name, active) => {
@@ -253,9 +272,9 @@ const onJoinRoom = (data) => {
 
         // If you are set as active, Activate Ready Button.
         if (username == name) {
-            document.getElementById("online-ready-button").disabled = !active;
-            document.getElementById("online-ready-button").innerText = "ready";
-            document.getElementById("online-ready-button").onclick =
+            queryElement("#online-ready-button").disabled = !active;
+            queryElement("#online-ready-button").innerText = "ready";
+            queryElement("#online-ready-button").onclick =
                 onOnlineReady;
         }
     };
@@ -302,7 +321,7 @@ const onJoinRoom = (data) => {
         const entry = document.getElementById(
             "member-element-" + data.peerName
         );
-        document.getElementById("member-list").removeChild(entry);
+        queryElement("#member-list").removeChild(entry);
     });
 
     // 'online-member-active' => indicating an update on the list of players playing.
@@ -335,8 +354,8 @@ function onOnlineReady() {
     );
 
     // switch callback function to online-unready
-    document.getElementById("online-ready-button").innerText = "unready";
-    document.getElementById("online-ready-button").onclick = onOnlineUnready;
+    queryElement("#online-ready-button").innerText = "unready";
+    queryElement("#online-ready-button").onclick = onOnlineUnready;
 }
 
 function onOnlineUnready() {
@@ -347,17 +366,17 @@ function onOnlineUnready() {
     socket.off("online-start");
 
     // switch callback function to online-unready
-    document.getElementById("online-ready-button").innerText = "ready";
-    document.getElementById("online-ready-button").onclick = onOnlineReady;
+    queryElement("#online-ready-button").innerText = "ready";
+    queryElement("#online-ready-button").onclick = onOnlineReady;
 }
 
 // ======== SETTING CALLBACKS ======= 
 // Home menu
-document.getElementById("banner").onclick = setHomeView; 
-document.getElementById("config-button").onclick = onConfig;
-document.getElementById("local-button").onclick = onLocal;
-document.getElementById("online-join-button").onclick = onOnlineJoin;
-document.getElementById("bot-button").onclick = onBot;
+queryElement("#banner").onclick = setHomeView; 
+queryElement("#config-button").onclick = onConfig;
+queryElement("#local-button").onclick = onLocal;
+queryElement("#online-join-button").onclick = onOnlineJoin;
+queryElement("#bot-button").onclick = onBot;
 
 // Slide menu In
 document.getElementById('home-box').style.left = '50%';

@@ -4,7 +4,7 @@ import { State } from "./state.mjs";
 import Renderer from "./renderer.mjs";
 import { FRAME_RATE } from "./config.mjs";
 
-export function BotConfigs (pps=1.5) {
+export function BotConfigs (pps) {
 	this.delay = 1 / pps;
 }
 
